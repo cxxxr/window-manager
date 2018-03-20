@@ -30,9 +30,6 @@
                                                    :substructure-redirect)
                                      :override-redirect :on)))
       (log-format "frame:~A child:~A" frame xwin)
-      (xlib:add-to-save-set xwin)
-      (xlib:reparent-window xwin frame 0 0)
-      (xlib:map-window frame)
       (let ((window (make-instance 'window
                                    :xwin xwin
                                    :frame frame
@@ -41,8 +38,13 @@
                                    :width (xlib:drawable-width xwin)
                                    :height (xlib:drawable-height xwin))))
         (push window *window-list*)
-        (when (eq (xlib:window-map-state xwin) :viewable)
-          (incf (window-count-ignore-unmap window)))))))
+        (xlib:add-to-save-set xwin)
+        (xlib:reparent-window xwin frame 0 0)
+        (cond ((eq (xlib:window-map-state xwin) :viewable)
+               (log-format "inc count-ignore-unmap: ~A ~A" window (window-count-ignore-unmap window))
+               (incf (window-count-ignore-unmap window)))
+              (t
+               (xlib:map-window frame)))))))
 
 (defun remove-window (window)
   (log-format "remove-window: ~A" window)
