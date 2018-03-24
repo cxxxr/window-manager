@@ -69,7 +69,7 @@
 (define-event-handler :unmap-notify (window event-window)
   (log-format "unmap-notify: ~A ~A" window event-window)
   (unless (xlib:window-equal *root* event-window)
-    (when-let (window (find-window window :frame nil))
+    (alexandria:when-let (window (find-window window :frame nil))
       (log-format "dec count-ignore-unmap: ~A ~A" window (window-count-ignore-unmap window))
       (if (plusp (window-count-ignore-unmap window))
           (decf (window-count-ignore-unmap window))
