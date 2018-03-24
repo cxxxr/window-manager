@@ -38,8 +38,10 @@
                          (push mod (modifiers-altgr modifiers)))))
         (setf *modifiers* modifiers)))))
 
-(defun get-mods (&key meta alt super hyper numlock altgr)
+(defun get-mods (&key control meta alt super hyper numlock altgr)
   (let ((mods '()))
+    (when control
+      (push :control mods))
     (when meta
       (alexandria:nconcf mods (modifiers-meta *modifiers*)))
     (when alt
@@ -55,8 +57,9 @@
     mods))
 
 (defclass input ()
-  ((states :initarg :states :initform nil :reader input-states)
-   (code :initarg :code :reader input-code)
+  ((states :initarg :states :initform nil :accessor input-states)
+   (code :initarg :code :accessor input-code)
+   (control :initarg :control :reader input-control)
    (meta :initarg :meta :reader input-meta)
    (alt :initarg :alt :reader input-alt)
    (super :initarg :super :reader input-super)
@@ -64,23 +67,36 @@
    (numlock :initarg :numlock :reader input-numlock)
    (altgr :initarg :altgr :reader input-altgr)))
 
-(defclass mouse-input (input) ())
+(defclass key-input (input)
+  ((name :initarg :name :reader key-input-name)))
 
-(defun make-mouse-input (code &key meta alt super hyper numlock altgr)
+(defclass mouse-input (input)
+  ())
+
+(defun make-key-input (name &key control meta alt super hyper numlock altgr)
+  (make-instance 'key-input
+                 :name name :control control :meta meta :alt alt :super super
+                 :hyper hyper :numlock numlock :altgr altgr))
+
+(defun make-mouse-input (code &key control meta alt super hyper numlock altgr)
   (make-instance 'mouse-input
-                 :code code :meta meta :alt alt :super super
+                 :code code :control control :meta meta :alt alt :super super
                  :hyper hyper :numlock numlock :altgr altgr))
 
 (defun update-input-states (input)
-  (with-slots (states meta alt super hyper numlock altgr) input
-    (let ((mods (get-mods :meta meta :alt alt :super super :hyper hyper
-                          :numlock numlock :altgr altgr)))
-      (let ((s (list (apply #'xlib:make-state-mask mods)
-                     (apply #'xlib:make-state-mask :lock mods)
-                     (apply #'xlib:make-state-mask :mod-2 mods)
-                     (apply #'xlib:make-state-mask :lock :mod-2 mods))))
-        (setf states s)
-        s))))
+  (let ((mods (get-mods :control (input-control input)
+                        :meta (input-meta input)
+                        :alt (input-alt input)
+                        :super (input-super input)
+                        :hyper (input-hyper input)
+                        :numlock (input-numlock input)
+                        :altgr (input-altgr input))))
+    (let ((status (list (apply #'xlib:make-state-mask mods)
+                        (apply #'xlib:make-state-mask :lock mods)
+                        (apply #'xlib:make-state-mask :mod-2 mods)
+                        (apply #'xlib:make-state-mask :lock :mod-2 mods))))
+      (setf (input-status input) status)
+      status)))
 
 (defvar *left-click* (make-mouse-input 1 :meta t))
 (defvar *right-click* (make-mouse-input 3 :meta t))
@@ -98,12 +114,22 @@
 (defgeneric grab-input (input)
   (:method ((input mouse-input))
    (dolist (s (update-input-states input))
-     (xlib:grab-button *root* (input-code input) '(:button-press) :modifiers s))))
+     (xlib:grab-button *root* (input-code input) '(:button-press) :modifiers s)))
+  (:method ((input key-input))
+   (let ((code (xlib:keysym->keycodes *display*
+                                      (cl-xkeysym:keysym-name->keysym
+                                       (key-input-name input)))))
+     (setf (input-code input) code)
+     (dolist (s (update-input-states input))
+       (xlib:grab-key *root* code :modifiers s)))))
 
 (defgeneric ungrab-input (input)
   (:method ((input mouse-input))
    (dolist (s (input-states input))
-     (xlib:ungrab-button *root* (input-code input) :modifiers s))))
+     (xlib:ungrab-button *root* (input-code input) :modifiers s)))
+  (:method ((input key-input))
+   (dolist (s (input-states input))
+     (xlib:ungrab-key *root* (input-code input) :modifiers s))))
 
 (defun grab-all ()
   (grab-input *left-click*)
