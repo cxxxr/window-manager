@@ -95,7 +95,7 @@
                         (apply #'xlib:make-state-mask :lock mods)
                         (apply #'xlib:make-state-mask :mod-2 mods)
                         (apply #'xlib:make-state-mask :lock :mod-2 mods))))
-      (setf (input-status input) status)
+      (setf (input-states input) status)
       status)))
 
 (defvar *left-click* (make-mouse-input 1 :meta t))
