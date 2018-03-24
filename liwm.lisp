@@ -10,6 +10,7 @@
                         (xlib:open-default-display)))
          (*screen* (xlib:display-default-screen *display*))
          (*root* (xlib:screen-root *screen*)))
+    (init-window)
     (init-input)
     (setf (xlib:window-event-mask *root*) '(:substructure-notify :substructure-redirect))
     (dolist (xwin (xlib:query-tree *root*))

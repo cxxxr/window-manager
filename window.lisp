@@ -12,6 +12,10 @@
    (height :initarg :height :accessor window-height)
    (count-ignore-unmap :initform 0 :accessor window-count-ignore-unmap)))
 
+(defun init-window ()
+  (setf *window-list* '())
+  (setf *frame-table* (make-hash-table)))
+
 (defun find-window (xwin &key frame)
   (if frame
       (find xwin *window-list* :key #'window-frame :test #'xlib:window-equal)
