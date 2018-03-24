@@ -17,3 +17,11 @@
     (setf (xlib:drawable-width xwin) width))
   (when height
     (setf (xlib:drawable-height xwin) height)))
+
+(defun run-program (command &key wait)
+  (uiop:run-program (format nil
+                            "DISPLAY=~A:~D; ~{~A~^ ~}~:[~; &~]"
+                            (xlib:display-host *display*)
+                            (xlib:display-display *display*)
+                            (uiop:ensure-list command)
+                            wait)))
