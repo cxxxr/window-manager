@@ -1,5 +1,9 @@
 (in-package :liwm)
 
+(defvar *last-mouse-x* 0)
+(defvar *last-mouse-y* 0)
+(defvar *last-mouse-state* nil)
+
 (defvar *event-table* (make-hash-table))
 
 (defmacro define-event-handler (event-name keys &body body)

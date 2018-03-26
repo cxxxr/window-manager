@@ -76,6 +76,16 @@
     (setf (window-width window) (xlib:drawable-width xwin))
     (setf (window-height window) (xlib:drawable-height xwin))))
 
+(defun configure-window (xwin &key x y width height)
+  (when x
+    (setf (xlib:drawable-x xwin) x))
+  (when y
+    (setf (xlib:drawable-y xwin) y))
+  (when width
+    (setf (xlib:drawable-width xwin) width))
+  (when height
+    (setf (xlib:drawable-height xwin) height)))
+
 (defun change-window-geometry (window &key x y width height)
   (labels ((configure (xwin)
              (configure-window xwin :x x :y y :width width :height height)))

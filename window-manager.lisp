@@ -45,3 +45,11 @@
 (defun finalize-window-manager ()
   (ungrab-all)
   (xlib:close-display (display)))
+
+(defun run-program (command &key wait)
+  (uiop:run-program (format nil
+                            "DISPLAY=~A:~D; ~{~A~^ ~}~:[~; &~]"
+                            (xlib:display-host (display))
+                            (xlib:display-display (display))
+                            (uiop:ensure-list command)
+                            wait)))
