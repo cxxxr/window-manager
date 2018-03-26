@@ -36,7 +36,7 @@
 
 (define-event-handler :button-release ()
   (log-format "button-release")
-  (xlib:ungrab-pointer *display*)
+  (xlib:ungrab-pointer (display))
   (setf *last-mouse-state* nil))
 
 (define-event-handler :configure-request (((:window xwin)) x y width height stack-mode value-mask)
@@ -68,7 +68,7 @@
 
 (define-event-handler :unmap-notify (window event-window)
   (log-format "unmap-notify: ~A ~A" window event-window)
-  (unless (xlib:window-equal *root* event-window)
+  (unless (xlib:window-equal (root) event-window)
     (alexandria:when-let (window (find-window window :frame nil))
       (log-format "dec count-ignore-unmap: ~A ~A" window (window-count-ignore-unmap window))
       (if (plusp (window-count-ignore-unmap window))

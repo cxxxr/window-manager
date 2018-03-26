@@ -1,8 +1,5 @@
 (in-package :liwm)
 
-(defparameter *window-list* '())
-(defparameter *frame-table* (make-hash-table))
-
 (defclass window ()
   ((xwin :initarg :xwin :reader window-xwin)
    (frame :initarg :frame :reader window-frame)
@@ -12,18 +9,14 @@
    (height :initarg :height :accessor window-height)
    (count-ignore-unmap :initform 0 :accessor window-count-ignore-unmap)))
 
-(defun init-window ()
-  (setf *window-list* '())
-  (setf *frame-table* (make-hash-table)))
-
 (defun find-window (xwin &key frame)
   (if frame
-      (find xwin *window-list* :key #'window-frame :test #'xlib:window-equal)
-      (find xwin *window-list* :key #'window-xwin :test #'xlib:window-equal)))
+      (find xwin (windows) :key #'window-frame :test #'xlib:window-equal)
+      (find xwin (windows) :key #'window-xwin :test #'xlib:window-equal)))
 
 (defun add-window (xwin)
-  (xlib:with-server-grabbed (*display*)
-    (let ((frame (xlib:create-window :parent *root*
+  (xlib:with-server-grabbed ((display))
+    (let ((frame (xlib:create-window :parent (root)
                                      :x (xlib:drawable-x xwin)
                                      :y (xlib:drawable-y xwin)
                                      :width (xlib:drawable-width xwin)
@@ -41,26 +34,27 @@
                                    :y (xlib:drawable-y xwin)
                                    :width (xlib:drawable-width xwin)
                                    :height (xlib:drawable-height xwin))))
-        (push window *window-list*)
+        (push window (windows))
         (xlib:add-to-save-set xwin)
         (xlib:reparent-window xwin frame 0 0)
         (cond ((eq (xlib:window-map-state xwin) :viewable)
-               (log-format "inc count-ignore-unmap: ~A ~A" window (window-count-ignore-unmap window))
+               (log-format "inc count-ignore-unmap: ~A ~A"
+                           window (window-count-ignore-unmap window))
                (incf (window-count-ignore-unmap window)))
               (t
                (xlib:map-window frame)))))))
 
 (defun remove-window (window)
   (log-format "remove-window: ~A" window)
-  (xlib:with-server-grabbed (*display*)
+  (xlib:with-server-grabbed ((display))
     (let ((frame (window-frame window))
           ;(xwin (window-xwin window))
           )
-      ;(xlib:reparent-window xwin *root* 0 0)
+      ;(xlib:reparent-window xwin (root) 0 0)
       ;(xlib:remove-from-save-set xwin)
       ;(xlib:unmap-window frame)
       (xlib:destroy-window frame)
-      (setf *window-list* (delete window *window-list*)))))
+      (setf (windows) (delete window (windows))))))
 
 (defun move-window (window mx my)
   (let ((frame (window-frame window)))
