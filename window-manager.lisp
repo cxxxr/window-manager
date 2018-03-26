@@ -7,7 +7,8 @@
    (screen :initarg :screen :reader screen)
    (root :initarg :root :reader root)
    (windows :initform '() :accessor windows)
-   (modifiers :accessor modifiers)))
+   (modifiers :accessor modifiers)
+   (binds :initform '() :accessor binds)))
 
 (defun make-window-manager (&optional display)
   (let* ((display (if display

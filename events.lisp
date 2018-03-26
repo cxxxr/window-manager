@@ -43,6 +43,11 @@
   (xlib:ungrab-pointer (display *window-manager*))
   (setf *last-mouse-state* nil))
 
+(define-event-handler :key-press (code state)
+  (log-format "key-press ~A ~A" code state)
+  (alexandria:when-let (function (find-binding-key state code))
+    (funcall function)))
+
 (define-event-handler :configure-request (((:window xwin)) x y width height stack-mode value-mask)
   (declare (ignore stack-mode))
   (log-format "configure-request: ~A" xwin)

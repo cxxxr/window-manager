@@ -140,5 +140,15 @@
 
 (defun ungrab-all ()
   (ungrab-input *left-click*)
-  (ungrab-input *right-click*))
+  (ungrab-input *right-click*)
+  (loop :for (key) :in (binds *window-manager*)
+        :do (ungrab-input key)))
 
+(defun bind-key (key function)
+  (grab-input key)
+  (push (cons key function) (binds *window-manager*)))
+
+(defun find-binding-key (state code)
+  (loop :for (key . function) :in (binds *window-manager*)
+        :when (input-equal key state code)
+        :do (return function)))
