@@ -10,10 +10,12 @@
 
 (defun init-modifiers ()
   (labels ((find-mod (name codes)
-             (find (xlib:keysym->keycodes (display) (cl-xkeysym:keysym-name->keysym name)) codes)))
+             (find (xlib:keysym->keycodes (display *window-manager*)
+                                          (cl-xkeysym:keysym-name->keysym name))
+                   codes)))
     (multiple-value-bind (shift-codes lock-codes control-codes
                           mod1-codes mod2-codes mod3-codes mod4-codes mod5-codes)
-        (xlib:modifier-mapping (display))
+        (xlib:modifier-mapping (display *window-manager*))
       (declare (ignore shift-codes lock-codes control-codes))
       (let ((modifiers (make-modifiers)))
         (loop :for mod :in '(:mod-1 :mod-2 :mod-3 :mod-4 :mod-5)
@@ -34,24 +36,24 @@
                          (push mod (modifiers-numlock modifiers)))
                         ((find-mod "ISO_Level3_Shift" codes)
                          (push mod (modifiers-altgr modifiers)))))
-        (setf (modifiers) modifiers)))))
+        (setf (modifiers *window-manager*) modifiers)))))
 
 (defun get-mods (&key control meta alt super hyper numlock altgr)
   (let ((mods '()))
     (when control
       (push :control mods))
     (when meta
-      (alexandria:nconcf mods (modifiers-meta (modifiers))))
+      (alexandria:nconcf mods (modifiers-meta (modifiers *window-manager*))))
     (when alt
-      (alexandria:nconcf mods (modifiers-alt (modifiers))))
+      (alexandria:nconcf mods (modifiers-alt (modifiers *window-manager*))))
     (when super
-      (alexandria:nconcf mods (modifiers-super (modifiers))))
+      (alexandria:nconcf mods (modifiers-super (modifiers *window-manager*))))
     (when hyper
-      (alexandria:nconcf mods (modifiers-hyper (modifiers))))
+      (alexandria:nconcf mods (modifiers-hyper (modifiers *window-manager*))))
     (when numlock
-      (alexandria:nconcf mods (modifiers-numlock (modifiers))))
+      (alexandria:nconcf mods (modifiers-numlock (modifiers *window-manager*))))
     (when altgr
-      (alexandria:nconcf mods (modifiers-altgr (modifiers))))
+      (alexandria:nconcf mods (modifiers-altgr (modifiers *window-manager*))))
     mods))
 
 (defclass input ()
@@ -112,22 +114,25 @@
 (defgeneric grab-input (input)
   (:method ((input mouse-input))
    (dolist (s (update-input-states input))
-     (xlib:grab-button (root) (input-code input) '(:button-press) :modifiers s)))
+     (xlib:grab-button (root *window-manager*)
+                       (input-code input)
+                       '(:button-press)
+                       :modifiers s)))
   (:method ((input key-input))
-   (let ((code (xlib:keysym->keycodes (display)
+   (let ((code (xlib:keysym->keycodes (display *window-manager*)
                                       (cl-xkeysym:keysym-name->keysym
                                        (key-input-name input)))))
      (setf (input-code input) code)
      (dolist (s (update-input-states input))
-       (xlib:grab-key (root) code :modifiers s)))))
+       (xlib:grab-key (root *window-manager*) code :modifiers s)))))
 
 (defgeneric ungrab-input (input)
   (:method ((input mouse-input))
    (dolist (s (input-states input))
-     (xlib:ungrab-button (root) (input-code input) :modifiers s)))
+     (xlib:ungrab-button (root *window-manager*) (input-code input) :modifiers s)))
   (:method ((input key-input))
    (dolist (s (input-states input))
-     (xlib:ungrab-key (root) (input-code input) :modifiers s))))
+     (xlib:ungrab-key (root *window-manager*) (input-code input) :modifiers s))))
 
 (defun grab-all ()
   (grab-input *left-click*)

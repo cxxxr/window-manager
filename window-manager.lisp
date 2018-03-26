@@ -1,32 +1,13 @@
 (in-package :liwm)
 
-(defmacro defclass-singleton (class-name superclasses slot-names (&key variable))
-  `(progn
-     (defclass ,class-name ,superclasses
-       ,(mapcar (lambda (slot-spec)
-                  (let* ((slot-name (first slot-spec))
-                         (initform-p (rest slot-spec))
-                         (initform (when initform-p (second slot-spec))))
-                    `(,slot-name :initarg ,(intern (princ-to-string slot-name) :keyword)
-                                 ,@(when initform-p `(:initform ,initform)))))
-                slot-names))
-     ,@(loop :for (slot-name) :in slot-names
-             :for accessor := slot-name
-             :collect `(defun ,accessor ()
-                         (slot-value ,variable ',slot-name))
-             :collect `(defun (setf ,accessor) (,slot-name)
-                         (setf (slot-value ,variable ',slot-name) ,slot-name)))))
-
 (defvar *window-manager*)
 
-(defclass-singleton window-manager ()
-  ((display)
-   (screen)
-   (root)
-   (windows '())
-   (frame-table)
-   (modifiers))
-  (:variable *window-manager*))
+(defclass window-manager ()
+  ((display :initarg :display :reader display)
+   (screen :initarg :screen :reader screen)
+   (root :initarg :root :reader root)
+   (windows :initform '() :accessor windows)
+   (modifiers :accessor modifiers)))
 
 (defun make-window-manager (&optional display)
   (let* ((display (if display
@@ -39,17 +20,17 @@
 (defun initialize-window-manager ()
   (init-modifiers)
   (grab-all)
-  (setf (xlib:window-event-mask (root))
+  (setf (xlib:window-event-mask (root *window-manager*))
         '(:substructure-notify :substructure-redirect)))
 
 (defun finalize-window-manager ()
   (ungrab-all)
-  (xlib:close-display (display)))
+  (xlib:close-display (display *window-manager*)))
 
 (defun run-program (command &key wait)
   (uiop:run-program (format nil
                             "DISPLAY=~A:~D; ~{~A~^ ~}~:[~; &~]"
-                            (xlib:display-host (display))
-                            (xlib:display-display (display))
+                            (xlib:display-host (display *window-manager*))
+                            (xlib:display-display (display *window-manager*))
                             (uiop:ensure-list command)
                             wait)))

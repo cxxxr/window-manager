@@ -2,12 +2,12 @@
 
 (defun event-loop ()
   (loop
-   (xlib:process-event (display) :handler #'handle-event :discard-p t)))
+   (xlib:process-event (display *window-manager*) :handler #'handle-event :discard-p t)))
 
 (defun main (&key display)
   (let ((*window-manager* (make-window-manager display)))
     (initialize-window-manager)
-    (dolist (xwin (xlib:query-tree (root)))
+    (dolist (xwin (xlib:query-tree (root *window-manager*)))
       (when (and (eq (xlib:window-override-redirect xwin) :off)
                  (eq (xlib:window-map-state xwin) :viewable))
         (add-window xwin)))
