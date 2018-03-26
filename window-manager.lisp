@@ -29,7 +29,7 @@
 
 (defun run-program (command &key wait)
   (uiop:run-program (format nil
-                            "DISPLAY=~A:~D; ~{~A~^ ~}~:[~; &~]"
+                            "DISPLAY=~A:~D; ~{~A~^ ~}~:[&~;~]"
                             (xlib:display-host (display *window-manager*))
                             (xlib:display-display (display *window-manager*))
                             (uiop:ensure-list command)
