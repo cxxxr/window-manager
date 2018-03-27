@@ -2,6 +2,9 @@
 
 (defvar *window-manager*)
 
+(defgeneric initialize-window-manager (window-manager))
+(defgeneric finalize-window-manager (window-manager))
+
 (defclass window-manager ()
   ((display :initarg :display :reader display)
    (screen :initarg :screen :reader screen)
@@ -18,15 +21,17 @@
          (root (xlib:screen-root screen)))
     (make-instance 'window-manager :display display :screen screen :root root)))
 
-(defun initialize-window-manager ()
-  (init-modifiers)
-  (grab-all)
-  (setf (xlib:window-event-mask (root *window-manager*))
-        '(:substructure-notify :substructure-redirect)))
+(defun event-loop ()
+  (loop
+   (xlib:process-event (display *window-manager*)
+                       :handler #'handle-event
+                       :discard-p t)))
 
-(defun finalize-window-manager ()
-  (ungrab-all)
-  (xlib:close-display (display *window-manager*)))
+(defun run-window-manager (display)
+  (let ((*window-manager* (make-window-manager display)))
+    (initialize-window-manager *window-manager*)
+    (unwind-protect (event-loop)
+      (finalize-window-manager *window-manager*))))
 
 (defun run-program (command &key wait)
   (uiop:run-program (format nil
