@@ -1,2 +1,3 @@
 (defpackage :liwm
-  (:use :cl))
+  (:use :cl)
+  (:export :main))
