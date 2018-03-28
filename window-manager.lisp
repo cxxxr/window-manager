@@ -10,6 +10,7 @@
    (screen :initarg :screen :reader screen)
    (root :initarg :root :reader root)
    (windows :initform '() :accessor windows)
+   (current-window :accessor current-window)
    (modifiers :accessor modifiers)
    (binds :initform '() :accessor binds)))
 
