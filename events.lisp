@@ -17,16 +17,16 @@
 (define-event-handler :button-press (state code child x y)
   (log-format "button-press: ~A" child)
   (when child
+    (setf *last-mouse-x* x
+          *last-mouse-y* y)
     (cond ((move-mouse-input-p state code)
-           (setf *last-mouse-x* x
-                 *last-mouse-y* y
-                 *last-mouse-state* :move)
+           (setf *last-mouse-state* :move)
            (xlib:grab-pointer child '(:pointer-motion :button-release)))
           ((resize-mouse-input-p state code)
-           (setf *last-mouse-x* x
-                 *last-mouse-y* y
-                 *last-mouse-state* :resize)
-           (xlib:grab-pointer child '(:pointer-motion :button-release))))))
+           (setf *last-mouse-state* :resize)
+           (xlib:grab-pointer child '(:pointer-motion :button-release))))
+    (alexandria:when-let (window (find-window child :frame t))
+      (focus-window window))))
 
 (define-event-handler :motion-notify (event-window root-x root-y)
   (log-format "motion-notify: ~A" event-window)
