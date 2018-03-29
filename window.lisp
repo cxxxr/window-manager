@@ -1,5 +1,8 @@
 (in-package :liwm)
 
+(defparameter +frame-height+ 12)
+(defparameter +frame-color+ #x808080)
+
 (defclass window ()
   ((xwin :initarg :xwin :reader window-xwin)
    (frame :initarg :frame :reader window-frame)
@@ -20,9 +23,10 @@
                                      :x (xlib:drawable-x xwin)
                                      :y (xlib:drawable-y xwin)
                                      :width (xlib:drawable-width xwin)
-                                     :height (xlib:drawable-height xwin)
-                                     :border-width 2
-                                     :border #xff0000
+                                     :height (+ (xlib:drawable-height xwin) +frame-height+)
+                                     :border-width 4
+                                     :border +frame-color+
+                                     :background +frame-color+
                                      :event-mask '(:substructure-notify
                                                    :substructure-redirect)
                                      :override-redirect :on)))
@@ -36,7 +40,7 @@
                                    :height (xlib:drawable-height xwin))))
         (push window (windows *window-manager*))
         (xlib:add-to-save-set xwin)
-        (xlib:reparent-window xwin frame 0 0)
+        (xlib:reparent-window xwin frame 0 +frame-height+)
         (cond ((eq (xlib:window-map-state xwin) :viewable)
                (log-format "inc count-ignore-unmap: ~A ~A"
                            window (window-count-ignore-unmap window))
