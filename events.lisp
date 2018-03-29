@@ -17,13 +17,16 @@
 (define-event-handler :button-press (state code child x y)
   (log-format "button-press: ~A" child)
   (when child
-    (let ((left-click-p (left-click-p state code))
-          (right-click-p (right-click-p state code)))
-      (when (or left-click-p right-click-p)
-        (setf *last-mouse-x* x
-              *last-mouse-y* y
-              *last-mouse-state* (if left-click-p :move :resize))
-        (xlib:grab-pointer child '(:pointer-motion :button-release))))))
+    (cond ((move-mouse-input-p state code)
+           (setf *last-mouse-x* x
+                 *last-mouse-y* y
+                 *last-mouse-state* :move)
+           (xlib:grab-pointer child '(:pointer-motion :button-release)))
+          ((resize-mouse-input-p state code)
+           (setf *last-mouse-x* x
+                 *last-mouse-y* y
+                 *last-mouse-state* :resize)
+           (xlib:grab-pointer child '(:pointer-motion :button-release))))))
 
 (define-event-handler :motion-notify (event-window root-x root-y)
   (log-format "motion-notify: ~A" event-window)

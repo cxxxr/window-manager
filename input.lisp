@@ -98,18 +98,18 @@
       (setf (input-states input) status)
       status)))
 
-(defparameter *left-click* (make-mouse-input 1 :meta t))
-(defparameter *right-click* (make-mouse-input 3 :meta t))
+(defparameter *move-mouse-input* (make-mouse-input 1 :meta t))
+(defparameter *resize-mouse-input* (make-mouse-input 3 :meta t))
 
 (defun input-equal (input state code)
   (and (= code (input-code input))
        (member state (input-states input))))
 
-(defun left-click-p (state code)
-  (input-equal *left-click* state code))
+(defun move-mouse-input-p (state code)
+  (input-equal *move-mouse-input* state code))
 
-(defun right-click-p (state code)
-  (input-equal *right-click* state code))
+(defun resize-mouse-input-p (state code)
+  (input-equal *resize-mouse-input* state code))
 
 (defgeneric grab-input (input)
   (:method ((input mouse-input))
@@ -135,12 +135,12 @@
      (xlib:ungrab-key (root *window-manager*) (input-code input) :modifiers s))))
 
 (defun grab-all ()
-  (grab-input *left-click*)
-  (grab-input *right-click*))
+  (grab-input *move-mouse-input*)
+  (grab-input *resize-mouse-input*))
 
 (defun ungrab-all ()
-  (ungrab-input *left-click*)
-  (ungrab-input *right-click*)
+  (ungrab-input *move-mouse-input*)
+  (ungrab-input *resize-mouse-input*)
   (loop :for (key) :in (binds *window-manager*)
         :do (ungrab-input key)))
 
