@@ -58,12 +58,18 @@
            (has-y () (= 2 (logand value-mask 2)))
            (has-w () (= 4 (logand value-mask 4)))
            (has-h () (= 8 (logand value-mask 8))))
-    (alexandria:when-let (window (find-window xwin :frame nil))
-      (change-window-geometry window
-                              :x (and (has-x) x)
-                              :y (and (has-y) y)
-                              :width (and (has-w) width)
-                              :height (and (has-h) height)))))
+    (let ((window (find-window xwin :frame nil)))
+      (cond (window
+             (change-window-geometry window
+                                     :x (and (has-x) x)
+                                     :y (and (has-y) y)
+                                     :width (and (has-w) width)
+                                     :height (and (has-h) height)))
+            (t
+             (when (has-x) (setf (xlib:drawable-x xwin) x))
+             (when (has-y) (setf (xlib:drawable-y xwin) y))
+             (when (has-w) (setf (xlib:drawable-width xwin) width))
+             (when (has-h) (setf (xlib:drawable-height xwin) height)))))))
 
 (define-event-handler :map-request (window)
   (cond ((find-window window :frame nil))
