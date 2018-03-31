@@ -85,10 +85,12 @@
                     (return (first rest)))))))
 
 (defun focus-next-window ()
-  (focus-window (get-next-window (current-window *window-manager*))))
+  (unless (null (windows *window-manager*))
+    (focus-window (get-next-window (current-window *window-manager*)))))
 
 (defun focus-previous-window ()
-  (focus-window (get-previous-window (current-window *window-manager*))))
+  (unless (null (windows *window-manager*))
+    (focus-window (get-previous-window (current-window *window-manager*)))))
 
 (defun move-window (window mx my)
   (change-window-geometry window

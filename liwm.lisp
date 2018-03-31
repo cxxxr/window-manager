@@ -15,7 +15,8 @@
     (when (and (eq (xlib:window-override-redirect xwin) :off)
                (eq (xlib:window-map-state xwin) :viewable))
       (add-window xwin)))
-  (focus-window (first (windows *window-manager*))))
+  (alexandria:when-let (window (first (windows *window-manager*)))
+    (focus-window window)))
 
 (defmethod finalize-window-manager ((*window-manager* window-manager))
   (ungrab-all)
