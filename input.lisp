@@ -100,6 +100,7 @@
 
 (defparameter *move-mouse-input* (make-mouse-input 1 :meta t))
 (defparameter *resize-mouse-input* (make-mouse-input 3 :meta t))
+(defparameter *left-click-input* (make-mouse-input 1))
 
 (defun input-equal (input state code)
   (and (= code (input-code input))
@@ -111,13 +112,19 @@
 (defun resize-mouse-input-p (state code)
   (input-equal *resize-mouse-input* state code))
 
+(defun left-click-input-p (state code)
+  (input-equal *left-click-input* state code))
+
 (defgeneric grab-input (input)
   (:method ((input mouse-input))
    (dolist (s (update-input-states input))
      (xlib:grab-button (root *window-manager*)
                        (input-code input)
                        '(:button-press)
-                       :modifiers s)))
+                       :modifiers s
+                       :owner-p nil
+                       :sync-pointer-p t
+                       :sync-keyboard-p nil)))
   (:method ((input key-input))
    (let ((code (xlib:keysym->keycodes (display *window-manager*)
                                       (cl-xkeysym:keysym-name->keysym
@@ -136,11 +143,13 @@
 
 (defun grab-all ()
   (grab-input *move-mouse-input*)
-  (grab-input *resize-mouse-input*))
+  (grab-input *resize-mouse-input*)
+  (grab-input *left-click-input*))
 
 (defun ungrab-all ()
   (ungrab-input *move-mouse-input*)
   (ungrab-input *resize-mouse-input*)
+  (ungrab-input *left-click-input*)
   (loop :for (key) :in (binds *window-manager*)
         :do (ungrab-input key)))
 

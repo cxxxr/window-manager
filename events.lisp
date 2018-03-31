@@ -14,8 +14,7 @@
                 ,@body))
        (setf (gethash ,event-name *event-table*) #',fn-name))))
 
-(define-event-handler :button-press (state code child x y)
-  (log-format "button-press: ~A" child)
+(define-event-handler :button-press (state code child x y time)
   (when child
     (setf *last-mouse-x* x
           *last-mouse-y* y)
@@ -24,7 +23,9 @@
            (xlib:grab-pointer child '(:pointer-motion :button-release)))
           ((resize-mouse-input-p state code)
            (setf *last-mouse-state* :resize)
-           (xlib:grab-pointer child '(:pointer-motion :button-release))))
+           (xlib:grab-pointer child '(:pointer-motion :button-release)))
+          ((left-click-input-p state code)
+           (xlib:allow-events (display *window-manager*) :replay-pointer time)))
     (alexandria:when-let (window (find-window child :frame t))
       (focus-window window))))
 
