@@ -96,24 +96,14 @@
   (focus-window (get-previous-window (current-window *window-manager*))))
 
 (defun move-window (window mx my)
-  (let ((frame (window-frame window)))
-    (xlib:with-state (frame)
-      (incf (xlib:drawable-x frame) mx)
-      (incf (xlib:drawable-y frame) my))
-    (setf (window-x window) (xlib:drawable-x frame))
-    (setf (window-y window) (xlib:drawable-y frame))))
+  (change-window-geometry window
+                          :x (+ (window-x window) mx)
+                          :y (+ (window-y window) my)))
 
 (defun resize-window (window mx my)
-  (let ((xwin (window-xwin window))
-        (frame (window-frame window)))
-    (xlib:with-state (frame)
-      (incf (xlib:drawable-width frame) mx)
-      (incf (xlib:drawable-height frame) my)
-      (xlib:with-state (xwin)
-        (setf (xlib:drawable-width xwin) (xlib:drawable-width frame))
-        (setf (xlib:drawable-height xwin) (xlib:drawable-height frame))))
-    (setf (window-width window) (xlib:drawable-width xwin))
-    (setf (window-height window) (xlib:drawable-height xwin))))
+  (change-window-geometry window
+                          :width (+ (window-width window) mx)
+                          :height (+ (window-height window) my)))
 
 (defun change-window-geometry (window &key x y width height (border +border-width+))
   (let ((xwin (window-xwin window))
