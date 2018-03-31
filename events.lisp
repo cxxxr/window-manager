@@ -16,18 +16,22 @@
 
 (define-event-handler :button-press (state code child x y time)
   (when child
-    (setf *last-mouse-x* x
-          *last-mouse-y* y)
-    (cond ((move-mouse-input-p state code)
-           (setf *last-mouse-state* :move)
-           (xlib:grab-pointer child '(:pointer-motion :button-release)))
-          ((resize-mouse-input-p state code)
-           (setf *last-mouse-state* :resize)
-           (xlib:grab-pointer child '(:pointer-motion :button-release)))
-          ((left-click-input-p state code)
-           (xlib:allow-events (display *window-manager*) :replay-pointer time)))
-    (alexandria:when-let (window (find-window child :frame t))
-      (focus-window window))))
+    (let ((window (find-window child :frame t)))
+      (setf *last-mouse-x* x
+            *last-mouse-y* y)
+      (cond ((move-mouse-input-p state code)
+             (setf *last-mouse-state* :move)
+             (xlib:grab-pointer child '(:pointer-motion :button-release)))
+            ((resize-mouse-input-p state code)
+             (setf *last-mouse-state* :resize)
+             (xlib:grab-pointer child '(:pointer-motion :button-release)))
+            ((left-click-input-p state code)
+             (xlib:allow-events (display *window-manager*) :replay-pointer time)
+             (when (on-frame-p window x y)
+               (setf *last-mouse-state* :move)
+               (xlib:grab-pointer child '(:pointer-motion :button-release)))))
+      (when window
+        (focus-window window)))))
 
 (define-event-handler :motion-notify (event-window root-x root-y)
   (log-format "motion-notify: ~A" event-window)

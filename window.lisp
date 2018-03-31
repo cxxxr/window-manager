@@ -61,6 +61,10 @@
       (setf (windows *window-manager*)
             (delete window (windows *window-manager*))))))
 
+(defun on-frame-p (window x y)
+  (declare (ignore x))
+  (<= 0 (- y (window-y window)) +frame-height+))
+
 (defun focus-window (window)
   (xlib:set-input-focus (display *window-manager*) (window-xwin window) :pointer-root)
   (setf (current-window *window-manager*) window)
