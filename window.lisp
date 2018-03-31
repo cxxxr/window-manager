@@ -114,22 +114,21 @@
     (setf (window-width window) (xlib:drawable-width xwin))
     (setf (window-height window) (xlib:drawable-height xwin))))
 
-(defun configure-window (xwin &key x y width height)
-  (when x
-    (setf (xlib:drawable-x xwin) x))
-  (when y
-    (setf (xlib:drawable-y xwin) y))
-  (when width
-    (setf (xlib:drawable-width xwin) width))
-  (when height
-    (setf (xlib:drawable-height xwin) height)))
-
 (defun change-window-geometry (window &key x y width height)
-  (labels ((configure (xwin)
-             (configure-window xwin :x x :y y :width width :height height)))
-    (let ((xwin (window-xwin window))
-          (frame (window-frame window)))
-      (xlib:with-state (frame)
-        (configure frame)
-        (xlib:with-state (xwin)
-          (configure xwin))))))
+  (let ((xwin (window-xwin window))
+        (frame (window-frame window)))
+    (xlib:with-state (frame)
+      (xlib:with-state (xwin)
+        (when x
+          (setf (window-x window) x)
+          (setf (xlib:drawable-x frame) x))
+        (when y
+          (setf (window-y window) y)
+          (setf (xlib:drawable-y frame) y))
+        (when width
+          (setf (window-width window) width)
+          (setf (xlib:drawable-width xwin) width))
+        (when height
+          (setf (window-height window) height)
+          (setf (xlib:drawable-height xwin) height))))))
+          

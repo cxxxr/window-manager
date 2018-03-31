@@ -53,24 +53,17 @@
   (alexandria:when-let (function (find-binding-key state code))
     (funcall function)))
 
-(define-event-handler :configure-request (((:window xwin)) x y width height stack-mode value-mask)
-  (declare (ignore stack-mode))
+(define-event-handler :configure-request (((:window xwin)) x y width height #|stack-mode|# value-mask)
   (labels ((has-x () (= 1 (logand value-mask 1)))
            (has-y () (= 2 (logand value-mask 2)))
            (has-w () (= 4 (logand value-mask 4)))
            (has-h () (= 8 (logand value-mask 8))))
-    (let ((window (find-window xwin :frame nil)))
-      (if window
-          (change-window-geometry window
-                                  :x (and (has-x) x)
-                                  :y (and (has-y) y)
-                                  :width (and (has-w) width)
-                                  :height (and (has-h) height))
-          (configure-window xwin
-                            :x (and (has-x) x)
-                            :y (and (has-y) y)
-                            :width (and (has-w) width)
-                            :height (and (has-h) height))))))
+    (alexandria:when-let (window (find-window xwin :frame nil))
+      (change-window-geometry window
+                              :x (and (has-x) x)
+                              :y (and (has-y) y)
+                              :width (and (has-w) width)
+                              :height (and (has-h) height)))))
 
 (define-event-handler :map-request (window)
   (cond ((find-window window :frame nil))
