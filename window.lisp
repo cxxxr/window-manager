@@ -31,7 +31,6 @@
                                      :event-mask '(:substructure-notify
                                                    :substructure-redirect)
                                      :override-redirect :on)))
-      (log-format "frame:~A child:~A" frame xwin)
       (let ((window (make-instance 'window
                                    :xwin xwin
                                    :frame frame
@@ -43,19 +42,25 @@
         (xlib:add-to-save-set xwin)
         (xlib:reparent-window xwin frame 0 +frame-height+)
         (cond ((eq (xlib:window-map-state xwin) :viewable)
-               (log-format "inc count-ignore-unmap: ~A ~A"
-                           window (window-count-ignore-unmap window))
                (incf (window-count-ignore-unmap window)))
               (t
                (xlib:map-window frame)))))))
 
 (defun remove-window (window)
-  (log-format "remove-window: ~A" window)
   (xlib:with-server-grabbed ((display *window-manager*))
+    (when (eq (current-window *window-manager*) window)
+      (setf (current-window *window-manager*)
+            (if (alexandria:length= (windows *window-manager*) 1)
+                nil
+                (get-previous-window window))))
     (let ((frame (window-frame window)))
       (xlib:destroy-window frame)
       (setf (windows *window-manager*)
             (delete window (windows *window-manager*))))))
+
+(defun quit-window (window)
+  (xlib:kill-client (display *window-manager*)
+                    (xlib:window-id (window-xwin window))))
 
 (defun on-frame-p (window x y)
   (declare (ignore x))

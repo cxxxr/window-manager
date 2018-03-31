@@ -11,6 +11,8 @@
             (lambda () (focus-next-window)))
   (bind-key (make-key-input "p" :super t)
             (lambda () (focus-previous-window)))
+  (bind-key (make-key-input "F4" :meta t)
+            (lambda () (quit-window (current-window *window-manager*))))
   (dolist (xwin (xlib:query-tree (root *window-manager*)))
     (when (and (eq (xlib:window-override-redirect xwin) :off)
                (eq (xlib:window-map-state xwin) :viewable))
