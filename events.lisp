@@ -53,23 +53,38 @@
   (alexandria:when-let (function (find-binding-key state code))
     (funcall function)))
 
-(define-event-handler :configure-request (((:window xwin)) x y width height #|stack-mode|# value-mask)
+(define-event-handler :configure-request (((:window xwin)) x y width height border-width value-mask stack-mode)
   (labels ((has-x () (= 1 (logand value-mask 1)))
            (has-y () (= 2 (logand value-mask 2)))
            (has-w () (= 4 (logand value-mask 4)))
-           (has-h () (= 8 (logand value-mask 8))))
+           (has-h () (= 8 (logand value-mask 8)))
+           (has-border () (= 16 (logand value-mask 16)))
+           (has-stack-mode () (= 64 (logand value-mask 64))))
     (let ((window (find-window xwin :frame nil)))
       (cond (window
-             (change-window-geometry window
-                                     :x (and (has-x) x)
-                                     :y (and (has-y) y)
-                                     :width (and (has-w) width)
-                                     :height (and (has-h) height)))
+             (unless *last-mouse-state*
+               (change-window-geometry window
+                                       :x (and (has-x) x)
+                                       :y (and (has-y) y)
+                                       :width (and (has-w) width)
+                                       :height (and (has-h) height))
+               (when (has-stack-mode)
+                 (focus-window window))
+               (xlib:send-event xwin :configure-notify nil
+                                :event-window xwin
+                                :window xwin
+                                :x x
+                                :y y
+                                :width width
+                                :height height
+                                :border-width border-width
+                                :propagate-p nil)))
             (t
              (when (has-x) (setf (xlib:drawable-x xwin) x))
              (when (has-y) (setf (xlib:drawable-y xwin) y))
              (when (has-w) (setf (xlib:drawable-width xwin) width))
-             (when (has-h) (setf (xlib:drawable-height xwin) height)))))))
+             (when (has-h) (setf (xlib:drawable-height xwin) height))
+             (when (has-border) (setf (xlib:drawable-border-width xwin) border-width)))))))
 
 (define-event-handler :map-request (window)
   (cond ((find-window window :frame nil))
