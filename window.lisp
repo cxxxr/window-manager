@@ -1,5 +1,6 @@
 (in-package :liwm)
 
+(defparameter +border-width+ 4)
 (defparameter +frame-height+ 12)
 (defparameter +frame-color+ #x808080)
 
@@ -24,7 +25,7 @@
                                      :y (xlib:drawable-y xwin)
                                      :width (xlib:drawable-width xwin)
                                      :height (+ (xlib:drawable-height xwin) +frame-height+)
-                                     :border-width 4
+                                     :border-width +border-width+
                                      :border +frame-color+
                                      :background +frame-color+
                                      :event-mask '(:substructure-notify
@@ -114,7 +115,7 @@
     (setf (window-width window) (xlib:drawable-width xwin))
     (setf (window-height window) (xlib:drawable-height xwin))))
 
-(defun change-window-geometry (window &key x y width height)
+(defun change-window-geometry (window &key x y width height (border +border-width+))
   (let ((xwin (window-xwin window))
         (frame (window-frame window)))
     (xlib:with-state (frame)
@@ -126,9 +127,10 @@
           (setf (window-y window) y)
           (setf (xlib:drawable-y frame) y))
         (when width
+          (setf (xlib:drawable-width frame) (+ (xlib:drawable-x xwin) width border))
           (setf (window-width window) width)
           (setf (xlib:drawable-width xwin) width))
         (when height
+          (setf (xlib:drawable-height frame) (+ (xlib:drawable-y xwin) height border))
           (setf (window-height window) height)
           (setf (xlib:drawable-height xwin) height))))))
-          
