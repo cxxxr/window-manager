@@ -25,4 +25,4 @@
   (xlib:close-display (display *window-manager*)))
 
 (defun main (&key display)
-  (run-window-manager display))
+  (run-window-manager (make-window-manager display)))

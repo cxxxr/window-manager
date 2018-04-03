@@ -14,7 +14,7 @@
    (modifiers :accessor modifiers)
    (binds :initform '() :accessor binds)))
 
-(defun make-window-manager (&optional display)
+(defun make-window-manager (display)
   (let* ((display (if display
                       (xlib:open-display "" :display display)
                       (xlib:open-default-display)))
@@ -28,11 +28,10 @@
                        :handler #'handle-event
                        :discard-p t)))
 
-(defun run-window-manager (display)
-  (let ((*window-manager* (make-window-manager display)))
-    (initialize-window-manager *window-manager*)
-    (unwind-protect (event-loop)
-      (finalize-window-manager *window-manager*))))
+(defun run-window-manager (*window-manager*)
+  (initialize-window-manager *window-manager*)
+  (unwind-protect (event-loop)
+    (finalize-window-manager *window-manager*)))
 
 (defun run-program (command &key wait)
   (uiop:run-program (format nil
