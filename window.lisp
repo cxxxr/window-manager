@@ -50,7 +50,7 @@
   (xlib:with-server-grabbed ((display *window-manager*))
     (when (eq (current-window *window-manager*) window)
       (setf (current-window *window-manager*)
-            (if (alexandria:length= (windows *window-manager*) 1)
+            (if (uiop:length=n-p (windows *window-manager*) 1)
                 nil
                 (get-previous-window window))))
     (let ((frame (window-frame window)))
@@ -61,6 +61,9 @@
 (defun quit-window (window)
   (xlib:kill-client (display *window-manager*)
                     (xlib:window-id (window-xwin window))))
+
+(defun maximum-window (window)
+  (declare (ignore window)))
 
 (defun on-frame-p (window x y)
   (declare (ignore x))
