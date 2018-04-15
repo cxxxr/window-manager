@@ -8,6 +8,9 @@
     :_NET_CURRENT_DESKTOP
     :_NET_WM_WINDOW_TYPE
     :_NET_WM_STATE
+    :_NET_WM_STATE_MAXIMiZED_VERT
+    :_NET_WM_STATE_MAXIMiZED_HORZ
+    :_NET_WM_STATE_FULLSCREEN
     :_NET_WM_STATE_MODAL
     :_NET_WM_ALLOWED_ACTIONS
     :_NET_WM_STATE_FULLSCREEN
@@ -42,6 +45,8 @@
             (lambda () (focus-previous-window)))
   (bind-key (make-key-input "F4" :meta t)
             (lambda () (quit-window (current-window *window-manager*))))
+  (bind-key (make-key-input "x" :super t)
+            (lambda () (maximize-window (current-window *window-manager*))))
   (initialize-netwm)
   (dolist (xwin (xlib:query-tree (root *window-manager*)))
     (when (and (eq (xlib:window-override-redirect xwin) :off)

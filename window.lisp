@@ -11,6 +11,10 @@
    (y :initarg :y :accessor window-y)
    (width :initarg :width :accessor window-width)
    (height :initarg :height :accessor window-height)
+   (old-x :initform nil :accessor window-old-x)
+   (old-y :initform nil :accessor window-old-y)
+   (old-width :initform nil :accessor window-old-width)
+   (old-height :initform nil :accessor window-old-height)
    (count-ignore-unmap :initform 0 :accessor window-count-ignore-unmap)))
 
 (defun find-window (xwin &key frame)
@@ -62,8 +66,33 @@
   (xlib:kill-client (display *window-manager*)
                     (xlib:window-id (window-xwin window))))
 
-(defun maximum-window (window)
-  (declare (ignore window)))
+(defun maximize-window (window)
+  (let (x y width height)
+    (cond ((window-old-width window)
+           (setf x (window-old-x window)
+                 y (window-old-y window)
+                 width (window-old-width window)
+                 height (window-old-height window)
+                 (window-old-x window) nil
+                 (window-old-y window) nil
+                 (window-old-width window) nil
+                 (window-old-height window) nil))
+          (t
+           (setf (window-old-x window) (window-x window)
+                 (window-old-y window) (window-y window)
+                 (window-old-width window) (window-width window)
+                 (window-old-height window) (window-height window)
+                 x 0
+                 y 0
+                 width (- (xlib:drawable-width (root *window-manager*))
+                          (* 2 +border-width+))
+                 height (- (xlib:drawable-height (root *window-manager*))
+                           (+ +frame-height+ +border-width+)))))
+    (xlib:change-property (window-xwin window) :_NET_WM_STATE
+                          (list (xlib:find-atom (display *window-manager*) :_NET_WM_STATE_MAXIMIZED_VERT)
+                                (xlib:find-atom (display *window-manager*) :_NET_WM_STATE_MAXIMIZED_HORZ))
+                          :atom 32)
+    (change-window-geometry window :x x :y y :width width :height height)))
 
 (defun on-frame-p (window x y)
   (declare (ignore x))
