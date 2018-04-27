@@ -26,12 +26,12 @@
              (setf *last-mouse-state* :resize)
              (xlib:grab-pointer child '(:pointer-motion :button-release)))
             ((left-click-input-p state code)
-             (xlib:allow-events (display *window-manager*) :replay-pointer time)
              (when (on-frame-p window x y)
                (setf *last-mouse-state* :move)
                (xlib:grab-pointer child '(:pointer-motion :button-release)))))
       (when window
-        (focus-window window)))))
+        (focus-window window))))
+  (xlib:allow-events (display *window-manager*) :replay-pointer time))
 
 (define-event-handler :motion-notify (event-window root-x root-y)
   (let ((mx (- root-x *last-mouse-x*))
