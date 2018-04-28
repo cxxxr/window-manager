@@ -89,8 +89,10 @@
                  height (- (xlib:drawable-height (root *window-manager*))
                            (+ +frame-height+ +border-width+)))))
     (xlib:change-property (window-xwin window) :_NET_WM_STATE
-                          (list (xlib:find-atom (display *window-manager*) :_NET_WM_STATE_MAXIMIZED_VERT)
-                                (xlib:find-atom (display *window-manager*) :_NET_WM_STATE_MAXIMIZED_HORZ))
+                          (list (xlib:find-atom (display *window-manager*)
+                                                :_NET_WM_STATE_MAXIMIZED_VERT)
+                                (xlib:find-atom (display *window-manager*)
+                                                :_NET_WM_STATE_MAXIMIZED_HORZ))
                           :atom 32)
     (change-window-geometry window :x x :y y :width width :height height)))
 
