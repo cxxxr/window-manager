@@ -15,7 +15,8 @@
    (old-y :initform nil :accessor window-old-y)
    (old-width :initform nil :accessor window-old-width)
    (old-height :initform nil :accessor window-old-height)
-   (count-ignore-unmap :initform 0 :accessor window-count-ignore-unmap)))
+   (count-ignore-unmap :initform 0 :accessor window-count-ignore-unmap)
+   (fullscreen :initform nil :accessor window-fullscreen)))
 
 (defun find-window (xwin &key frame)
   (if frame
@@ -66,35 +67,66 @@
   (xlib:kill-client (display *window-manager*)
                     (xlib:window-id (window-xwin window))))
 
-(defun maximize-window (window)
+(defun toggle-fullscreen (window)
+  (if (window-fullscreen window)
+      (deactivate-fullscreen window)
+      (activate-fullscreen window)))
+
+(defun deactivate-fullscreen (window)
+  (setf (window-fullscreen window) nil)
+  (unmaximize-window window t))
+
+(defun activate-fullscreen (window)
+  (setf (window-fullscreen window) t)
+  (maximize-window window t))
+
+(defun maximize-window (window &optional fullscreen)
   (let (x y width height)
-    (cond ((window-old-width window)
-           (setf x (window-old-x window)
-                 y (window-old-y window)
-                 width (window-old-width window)
-                 height (window-old-height window)
-                 (window-old-x window) nil
-                 (window-old-y window) nil
-                 (window-old-width window) nil
-                 (window-old-height window) nil))
-          (t
-           (setf (window-old-x window) (window-x window)
-                 (window-old-y window) (window-y window)
-                 (window-old-width window) (window-width window)
-                 (window-old-height window) (window-height window)
-                 x 0
-                 y 0
-                 width (- (xlib:drawable-width (root *window-manager*))
-                          (* 2 +border-width+))
-                 height (- (xlib:drawable-height (root *window-manager*))
-                           (+ +frame-height+ +border-width+)))))
+    (setf (window-old-x window) (window-x window)
+          (window-old-y window) (window-y window)
+          (window-old-width window) (window-width window)
+          (window-old-height window) (window-height window)
+          x (if fullscreen (- +border-width+) 0)
+          y (if fullscreen (- (+ +border-width+ +frame-height+)) 0)
+          width (if fullscreen
+                    (xlib:drawable-width (root *window-manager*))
+                    (- (xlib:drawable-width (root *window-manager*))
+                       (* 2 +border-width+)))
+          height (if fullscreen
+                     (xlib:drawable-height (root *window-manager*))
+                     (- (xlib:drawable-height (root *window-manager*))
+                        (+ +frame-height+ +border-width+))))
     (xlib:change-property (window-xwin window) :_NET_WM_STATE
-                          (list (xlib:find-atom (display *window-manager*)
-                                                :_NET_WM_STATE_MAXIMIZED_VERT)
-                                (xlib:find-atom (display *window-manager*)
-                                                :_NET_WM_STATE_MAXIMIZED_HORZ))
+                          (list* (xlib:find-atom (display *window-manager*)
+                                                 :_NET_WM_STATE_MAXIMIZED_VERT)
+                                 (xlib:find-atom (display *window-manager*)
+                                                 :_NET_WM_STATE_MAXIMIZED_HORZ)
+                                 (if fullscreen
+                                     (list (xlib:find-atom (display *window-manager*)
+                                                           :_NET_WM_STATE_FULLSCREEN))))
                           :atom 32)
     (change-window-geometry window :x x :y y :width width :height height)))
+
+(defun unmaximize-window (window &optional fullscreen)
+  (declare (ignore fullscreen))
+  (let (x y width height)
+    (setf x (window-old-x window)
+          y (window-old-y window)
+          width (window-old-width window)
+          height (window-old-height window)
+          (window-old-x window) nil
+          (window-old-y window) nil
+          (window-old-width window) nil
+          (window-old-height window) nil)
+    (xlib:change-property (window-xwin window) :_NET_WM_STATE
+                          '()
+                          :atom 32)
+    (change-window-geometry window :x x :y y :width width :height height)))
+
+(defun toggle-maximize-window (window)
+  (if (window-old-width window)
+      (unmaximize-window window)
+      (maximize-window window)))
 
 (defun on-frame-p (window x y)
   (declare (ignore x))

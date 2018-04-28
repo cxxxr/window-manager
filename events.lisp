@@ -105,6 +105,24 @@
           (decf (window-count-ignore-unmap window))
           (remove-window window)))))
 
+(defun change-fullscreen (window action)
+  (alexandria:switch (action :test #'=)
+    (+net-wm-state-remove+
+     (deactivate-fullscreen window))
+    (+net-wm-state-add+
+     (activate-fullscreen window))
+    (+net-wm-state-toggle+
+     (toggle-fullscreen window))))
+
+(define-event-handler :client-message (((:window xwin)) type data)
+  (case type
+    (:_NET_WM_STATE
+     (alexandria:when-let (window (find-window xwin :frame nil))
+       (loop :for i :from 1 :to 2
+             :do (case (xlib:atom-name (display *window-manager*) (aref data i))
+                   (:_NET_WM_STATE_FULLSCREEN
+                    (change-fullscreen window (aref data 0)))))))))
+
 (defun handle-event (&rest event-slots &key event-key &allow-other-keys)
   (let ((fn (gethash event-key *event-table*)))
     (when fn

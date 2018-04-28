@@ -26,6 +26,10 @@
     :_NET_WM_DESKTOP
     :_KDE_NET_SYSTEM_TRAY_WINDOW_FOR))
 
+(defparameter +net-wm-state-remove+ 0)
+(defparameter +net-wm-state-add+ 1)
+(defparameter +net-wm-state-toggle+ 2)
+
 (defclass window-manager ()
   ((display :initarg :display :reader display)
    (screen :initarg :screen :reader screen)
@@ -65,7 +69,7 @@
   (bind-key (make-key-input "F4" :meta t)
             (lambda () (quit-window (current-window *window-manager*))))
   (bind-key (make-key-input "x" :super t)
-            (lambda () (maximize-window (current-window *window-manager*))))
+            (lambda () (toggle-maximize-window (current-window *window-manager*))))
   (initialize-netwm)
   (dolist (xwin (xlib:query-tree (root *window-manager*)))
     (when (and (eq (xlib:window-override-redirect xwin) :off)
