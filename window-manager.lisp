@@ -26,6 +26,11 @@
     :_NET_WM_DESKTOP
     :_KDE_NET_SYSTEM_TRAY_WINDOW_FOR))
 
+(defparameter *netwm-allowed-actions*
+  '(:_NET_WM_ACTION_CHANGE_DESKTOP
+    :_NET_WM_ACTION_FULLSCREEN
+    :_NET_WM_ACTION_CLOSE))
+
 (defparameter +net-wm-state-remove+ 0)
 (defparameter +net-wm-state-add+ 1)
 (defparameter +net-wm-state-toggle+ 2)
@@ -53,6 +58,13 @@
                         (mapcar (lambda (s)
                                   (xlib:intern-atom (display *window-manager*) s))
                                 *netwm-supported*)
+                        :atom 32))
+
+(defun set-netwm-allowed-actions (xwin)
+  (xlib:change-property xwin :_NET_WM_ALLOWED_ACTIONS
+                        (mapcar (lambda (a)
+                                  (xlib:intern-atom (display *window-manager*) a))
+                                *netwm-allowed-actions*)
                         :atom 32))
 
 (defun initialize-window-manager (*window-manager*)
