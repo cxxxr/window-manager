@@ -2,7 +2,7 @@
 
 (defvar *window-manager*)
 
-(defparameter *netwm-symbols*
+(defparameter *netwm-supported*
   '(:_NET_SUPPORTING_WM_CHECK
     :_NET_NUMBER_OF_DESKTOPS
     :_NET_DESKTOP_GEOMETRY
@@ -47,12 +47,12 @@
          (root (xlib:screen-root screen)))
     (make-instance 'window-manager :display display :screen screen :root root)))
 
-(defun initialize-netwm ()
+(defun set-netwm-net-supported ()
   (xlib:change-property (root *window-manager*)
                         :_NET_SUPPORTED
                         (mapcar (lambda (s)
                                   (xlib:intern-atom (display *window-manager*) s))
-                                *netwm-symbols*)
+                                *netwm-supported*)
                         :atom 32))
 
 (defun initialize-window-manager (*window-manager*)
@@ -70,7 +70,7 @@
             (lambda () (quit-window (current-window *window-manager*))))
   (bind-key (make-key-input "x" :super t)
             (lambda () (toggle-maximize-window (current-window *window-manager*))))
-  (initialize-netwm)
+  (set-netwm-net-supported)
   (dolist (xwin (xlib:query-tree (root *window-manager*)))
     (when (and (eq (xlib:window-override-redirect xwin) :off)
                (eq (xlib:window-map-state xwin) :viewable))
