@@ -34,7 +34,8 @@
                                      :border +frame-color+
                                      :background +frame-color+
                                      :event-mask '(:substructure-notify
-                                                   :substructure-redirect)
+                                                   :substructure-redirect
+                                                   :property-change)
                                      :override-redirect :on)))
       (let ((window (make-instance 'window
                                    :xwin xwin

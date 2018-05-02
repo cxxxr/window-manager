@@ -27,9 +27,18 @@
     :_KDE_NET_SYSTEM_TRAY_WINDOW_FOR))
 
 (defparameter *netwm-allowed-actions*
-  '(:_NET_WM_ACTION_CHANGE_DESKTOP
+  '(:_NET_WM_ACTION_MOVE
+    :_NET_WM_ACTION_RESIZE
+    :_NET_WM_ACTION_MINIMIZE
+    :_NET_WM_ACTION_SHADE
+    :_NET_WM_ACTION_STICK
+    :_NET_WM_ACTION_MAXIMIZE_HORZ
+    :_NET_WM_ACTION_MAXIMIZE_VERT
     :_NET_WM_ACTION_FULLSCREEN
-    :_NET_WM_ACTION_CLOSE))
+    :_NET_WM_ACTION_CHANGE_DESKTOP
+    :_NET_WM_ACTION_CLOSE
+    :_NET_WM_ACTION_ABOVE
+    :_NET_WM_ACTION_BELOW))
 
 (defparameter +net-wm-state-remove+ 0)
 (defparameter +net-wm-state-add+ 1)
@@ -42,7 +51,8 @@
    (windows :initform '() :accessor windows)
    (current-window :accessor current-window)
    (modifiers :accessor modifiers)
-   (binds :initform '() :accessor binds)))
+   (binds :initform '() :accessor binds)
+   (supporting :accessor supporting)))
 
 (defun make-window-manager (display)
   (let* ((display (if display
@@ -51,14 +61,6 @@
          (screen (xlib:display-default-screen display))
          (root (xlib:screen-root screen)))
     (make-instance 'window-manager :display display :screen screen :root root)))
-
-(defun set-netwm-net-supported ()
-  (xlib:change-property (root *window-manager*)
-                        :_NET_SUPPORTED
-                        (mapcar (lambda (s)
-                                  (xlib:intern-atom (display *window-manager*) s))
-                                *netwm-supported*)
-                        :atom 32))
 
 (defun set-netwm-allowed-actions (xwin)
   (xlib:change-property xwin :_NET_WM_ALLOWED_ACTIONS
@@ -82,7 +84,24 @@
             (lambda () (quit-window (current-window *window-manager*))))
   (bind-key (make-key-input "x" :super t)
             (lambda () (toggle-maximize-window (current-window *window-manager*))))
-  (set-netwm-net-supported)
+  (xlib:change-property (root *window-manager*)
+                        :_NET_SUPPORTED
+                        (mapcar (lambda (s)
+                                  (xlib:intern-atom (display *window-manager*) s))
+                                *netwm-supported*)
+                        :atom 32)
+  (let ((w (xlib:create-window :parent (root *window-manager*) :x 0 :y 0 :width 1 :height 1)))
+    (setf (supporting *window-manager*) w)
+    (xlib:change-property (root *window-manager*) :_NET_SUPPORTING_WM_CHECK
+                          (list w) :window 32
+                          :transform #'xlib:drawable-id)
+    (xlib:change-property w :_NET_SUPPORTING_WM_CHECK
+                          (list w) :window 32
+                          :transform #'xlib:drawable-id))
+  (xlib:change-property (root *window-manager*) :_NET_DESKTOP_GEOMETRY
+                        (list (xlib:screen-width (screen *window-manager*))
+                              (xlib:screen-height (screen *window-manager*)))
+                        :cardinal 32)
   (dolist (xwin (xlib:query-tree (root *window-manager*)))
     (when (and (eq (xlib:window-override-redirect xwin) :off)
                (eq (xlib:window-map-state xwin) :viewable))
@@ -91,6 +110,7 @@
     (focus-window window)))
 
 (defun finalize-window-manager (*window-manager*)
+  (xlib:destroy-window (supporting *window-manager*))
   (ungrab-all)
   (xlib:close-display (display *window-manager*)))
 

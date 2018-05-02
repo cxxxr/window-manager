@@ -124,6 +124,7 @@
                     (change-fullscreen window (aref data 0)))))))))
 
 (defun handle-event (&rest event-slots &key event-key &allow-other-keys)
+  (log-format "~A" event-key)
   (let ((fn (gethash event-key *event-table*)))
     (when fn
       (apply fn event-slots))))
