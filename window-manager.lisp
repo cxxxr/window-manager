@@ -76,6 +76,13 @@
                         :window 32
                         :transform #'xlib:drawable-id))
 
+(defun update-net-client-list-stacking ()
+  (xlib:change-property (root *window-manager*)
+                        :_NET_CLIENT_LIST_STACKING
+                        (mapcar #'window-xwin (windows *window-manager*))
+                        :window 32
+                        :transform #'xlib:drawable-id))
+
 (defun initialize-window-manager (*window-manager*)
   (init-modifiers)
   (grab-all)
