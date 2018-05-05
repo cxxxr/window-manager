@@ -69,6 +69,13 @@
                                 *netwm-allowed-actions*)
                         :atom 32))
 
+(defun update-net-client-list ()
+  (xlib:change-property (root *window-manager*)
+                        :_NET_CLIENT_LIST
+                        (mapcar #'window-xwin (windows *window-manager*))
+                        :window 32
+                        :transform #'xlib:drawable-id))
+
 (defun initialize-window-manager (*window-manager*)
   (init-modifiers)
   (grab-all)
@@ -90,6 +97,9 @@
                                   (xlib:intern-atom (display *window-manager*) s))
                                 *netwm-supported*)
                         :atom 32)
+  (xlib:change-property (root *window-manager*)
+                        :_NET_CLIENT_LIST '() :window 32
+                        :transform #'xlib:drawable-id)
   (let ((w (xlib:create-window :parent (root *window-manager*) :x 0 :y 0 :width 1 :height 1)))
     (setf (supporting *window-manager*) w)
     (xlib:change-property (root *window-manager*) :_NET_SUPPORTING_WM_CHECK

@@ -45,6 +45,7 @@
                                    :width (xlib:drawable-width xwin)
                                    :height (xlib:drawable-height xwin))))
         (push window (windows *window-manager*))
+        (update-net-client-list)
         (xlib:add-to-save-set xwin)
         (xlib:reparent-window xwin frame 0 +frame-height+)
         (set-netwm-allowed-actions xwin)
@@ -63,7 +64,8 @@
     (let ((frame (window-frame window)))
       (xlib:destroy-window frame)
       (setf (windows *window-manager*)
-            (delete window (windows *window-manager*))))))
+            (delete window (windows *window-manager*)))
+      (update-net-client-list))))
 
 (defun quit-window (window)
   (xlib:kill-client (display *window-manager*)
