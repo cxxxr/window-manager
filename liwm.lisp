@@ -1,4 +1,16 @@
 (in-package :liwm)
 
 (defun main (&key display)
-  (start-window-manager (make-window-manager display)))
+  (start-window-manager
+   (make-window-manager display)
+   :initialized-hook (lambda ()
+                       (bind-key (make-key-input "t" :meta t :control t)
+                                 (lambda () (run-program "xterm" :wait nil)))
+                       (bind-key (make-key-input "n" :super t)
+                                 (lambda () (focus-next-window)))
+                       (bind-key (make-key-input "p" :super t)
+                                 (lambda () (focus-previous-window)))
+                       (bind-key (make-key-input "F4" :meta t)
+                                 (lambda () (quit-window (current-window *window-manager*))))
+                       (bind-key (make-key-input "x" :super t)
+                                 (lambda () (toggle-maximize-window (current-window *window-manager*)))))))

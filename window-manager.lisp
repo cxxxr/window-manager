@@ -131,16 +131,6 @@
   (grab-all)
   (setf (xlib:window-event-mask (root *window-manager*))
         '(:substructure-notify :substructure-redirect))
-  (bind-key (make-key-input "t" :meta t :control t)
-            (lambda () (run-program "xterm" :wait nil)))
-  (bind-key (make-key-input "n" :super t)
-            (lambda () (focus-next-window)))
-  (bind-key (make-key-input "p" :super t)
-            (lambda () (focus-previous-window)))
-  (bind-key (make-key-input "F4" :meta t)
-            (lambda () (quit-window (current-window *window-manager*))))
-  (bind-key (make-key-input "x" :super t)
-            (lambda () (toggle-maximize-window (current-window *window-manager*))))
   (xlib:change-property (root *window-manager*)
                         :_NET_SUPPORTED
                         (mapcar (lambda (s)
@@ -183,8 +173,9 @@
                        :handler #'handle-event
                        :discard-p t)))
 
-(defun start-window-manager (*window-manager*)
+(defun start-window-manager (*window-manager* &key initialized-hook)
   (initialize-window-manager *window-manager*)
+  (when initialized-hook (funcall initialized-hook))
   (unwind-protect (event-loop)
     (finalize-window-manager *window-manager*)))
 
