@@ -128,9 +128,6 @@
                                   (xlib:intern-atom (display *window-manager*) s))
                                 *netwm-supported*)
                         :atom 32)
-  (xlib:change-property (root *window-manager*)
-                        :_NET_CLIENT_LIST '() :window 32
-                        :transform #'xlib:drawable-id)
   (let ((w (xlib:create-window :parent (root *window-manager*) :x 0 :y 0 :width 1 :height 1)))
     (setf (supporting *window-manager*) w)
     (xlib:change-property (root *window-manager*)
@@ -140,10 +137,14 @@
     (xlib:change-property w :_NET_SUPPORTING_WM_CHECK
                           (list w) :window 32
                           :transform #'xlib:drawable-id))
+  (xlib:change-property (root *window-manager*)
+                        :_NET_CLIENT_LIST '() :window 32
+                        :transform #'xlib:drawable-id)
   (xlib:change-property (root *window-manager*) :_NET_DESKTOP_GEOMETRY
                         (list (xlib:screen-width (screen *window-manager*))
                               (xlib:screen-height (screen *window-manager*)))
                         :cardinal 32)
+  (xlib:change-property (root *window-manager*) :_NET_DESKTOP_VIEWPORT (list 0 0) :cardinal 32)
   (update-net-number-of-desktops)
   (dolist (xwin (xlib:query-tree (root *window-manager*)))
     (when (and (eq (xlib:window-override-redirect xwin) :off)
