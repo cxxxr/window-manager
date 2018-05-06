@@ -54,6 +54,25 @@
    (binds :initform '() :accessor binds)
    (supporting :accessor supporting)))
 
+(defclass vdesk ()
+  ((screen :initarg :screen :accessor vdesk-screen)
+   (windows :initform '() :accessor vdesk-windows)
+   (current-window :initform nil :accessor vdesk-current-window)))
+
+(defclass window ()
+  ((xwin :initarg :xwin :reader window-xwin)
+   (frame :initarg :frame :reader window-frame)
+   (x :initarg :x :accessor window-x)
+   (y :initarg :y :accessor window-y)
+   (width :initarg :width :accessor window-width)
+   (height :initarg :height :accessor window-height)
+   (old-x :initform nil :accessor window-old-x)
+   (old-y :initform nil :accessor window-old-y)
+   (old-width :initform nil :accessor window-old-width)
+   (old-height :initform nil :accessor window-old-height)
+   (count-ignore-unmap :initform 0 :accessor window-count-ignore-unmap)
+   (fullscreen :initform nil :accessor window-fullscreen)))
+
 (defun windows (*window-manager*)
   (vdesk-windows (current-vdesk *window-manager*)))
 

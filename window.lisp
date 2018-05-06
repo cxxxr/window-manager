@@ -4,20 +4,6 @@
 (defparameter +frame-height+ 12)
 (defparameter +frame-color+ #x808080)
 
-(defclass window ()
-  ((xwin :initarg :xwin :reader window-xwin)
-   (frame :initarg :frame :reader window-frame)
-   (x :initarg :x :accessor window-x)
-   (y :initarg :y :accessor window-y)
-   (width :initarg :width :accessor window-width)
-   (height :initarg :height :accessor window-height)
-   (old-x :initform nil :accessor window-old-x)
-   (old-y :initform nil :accessor window-old-y)
-   (old-width :initform nil :accessor window-old-width)
-   (old-height :initform nil :accessor window-old-height)
-   (count-ignore-unmap :initform 0 :accessor window-count-ignore-unmap)
-   (fullscreen :initform nil :accessor window-fullscreen)))
-
 (defun find-window (xwin &key frame)
   (if frame
       (find xwin (windows *window-manager*) :key #'window-frame :test #'xlib:window-equal)
