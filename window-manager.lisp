@@ -48,19 +48,37 @@
   ((display :initarg :display :reader display)
    (screen :initarg :screen :reader screen)
    (root :initarg :root :reader root)
-   (windows :initform '() :accessor windows)
-   (current-window :accessor current-window)
+   (vdesks :initarg :vdesks :accessor vdesks)
+   (current-vdesk :initarg :current-vdesk :accessor current-vdesk)
    (modifiers :accessor modifiers)
    (binds :initform '() :accessor binds)
    (supporting :accessor supporting)))
+
+(defun windows (*window-manager*)
+  (vdesk-windows (current-vdesk *window-manager*)))
+
+(defun (setf windows) (value *window-manager*)
+  (setf (vdesk-windows (current-vdesk *window-manager*)) value))
+
+(defun current-window (*window-manager*)
+  (vdesk-current-window (current-vdesk *window-manager*)))
+
+(defun (setf current-window) (value *window-manager*)
+  (setf (vdesk-current-window (current-vdesk *window-manager*)) value))
 
 (defun make-window-manager (display)
   (let* ((display (if display
                       (xlib:open-display "" :display display)
                       (xlib:open-default-display)))
          (screen (xlib:display-default-screen display))
-         (root (xlib:screen-root screen)))
-    (make-instance 'window-manager :display display :screen screen :root root)))
+         (root (xlib:screen-root screen))
+         (vdesk (make-instance 'vdesk :screen screen)))
+    (make-instance 'window-manager
+                   :display display
+                   :screen screen
+                   :root root
+                   :vdesks (list vdesk)
+                   :current-vdesk vdesk)))
 
 (defun set-netwm-allowed-actions (xwin)
   (xlib:change-property xwin :_NET_WM_ALLOWED_ACTIONS
