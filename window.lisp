@@ -55,6 +55,13 @@
       (update-net-client-list)
       (update-net-client-list-stacking))))
 
+(defun hide-window (window)
+  (unless (eq (xlib:window-map-state (window-xwin window)) :unmapped)
+    (incf (window-count-ignore-unmap window))
+    (setf (wm-state (window-xwin window)) +iconic-state+)
+    (xlib:unmap-window (window-xwin window))
+    (xlib:unmap-subwindows (window-frame window))))
+
 (defun quit-window (window)
   (xlib:kill-client (display *window-manager*)
                     (xlib:window-id (window-xwin window))))
