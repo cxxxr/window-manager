@@ -36,10 +36,10 @@
         (xlib:add-to-save-set xwin)
         (xlib:reparent-window xwin frame 0 +frame-height+)
         (set-netwm-allowed-actions xwin)
-        (cond ((eq (xlib:window-map-state xwin) :viewable)
-               (incf (window-count-ignore-unmap window)))
+        (cond ((eq (xlib:window-map-state xwin) :unmapped)
+               (xlib:map-window frame))
               (t
-               (xlib:map-window frame)))))))
+               (incf (window-count-ignore-unmap window))))))))
 
 (defun remove-window (window)
   (xlib:with-server-grabbed ((display *window-manager*))
