@@ -62,6 +62,11 @@
     (xlib:unmap-window (window-xwin window))
     (xlib:unmap-subwindows (window-frame window))))
 
+(defun show-window (window)
+  (xlib:map-subwindows (window-frame window))
+  (xlib:map-window (window-frame window))
+  (setf (wm-state (window-xwin window)) +normal-state+))
+
 (defun quit-window (window)
   (xlib:kill-client (display *window-manager*)
                     (xlib:window-id (window-xwin window))))
