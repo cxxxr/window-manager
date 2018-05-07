@@ -44,6 +44,10 @@
 (defparameter +net-wm-state-add+ 1)
 (defparameter +net-wm-state-toggle+ 2)
 
+(defparameter +withdrawn-state+ 0)
+(defparameter +normal-state+ 1)
+(defparameter +iconic-state+ 3)
+
 (defclass window-manager ()
   ((display :initarg :display :reader display)
    (screen :initarg :screen :reader screen)
@@ -98,6 +102,12 @@
                    :root root
                    :vdesks (list vdesk)
                    :current-vdesk vdesk)))
+
+(defun wm-state (xwin)
+  (first (xlib:get-property xwin :WM_STATE)))
+
+(defun (setf wm-state) (state xwin)
+  (xlib:change-property xwin :WM_STATE (list state) :WM_STATE 32))
 
 (defun set-netwm-allowed-actions (xwin)
   (xlib:change-property xwin :_NET_WM_ALLOWED_ACTIONS
