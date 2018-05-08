@@ -59,7 +59,7 @@
   (unless (eq (xlib:window-map-state (window-xwin window)) :unmapped)
     (incf (window-count-ignore-unmap window))
     (setf (wm-state (window-xwin window)) +iconic-state+)
-    (xlib:unmap-window (window-xwin window))
+    (xlib:unmap-window (window-frame window))
     (xlib:unmap-subwindows (window-frame window))))
 
 (defun show-window (window)
