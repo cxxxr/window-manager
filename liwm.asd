@@ -6,6 +6,7 @@
   :components ((:file "package")
                (:file "logger")
                (:file "window-manager")
+               (:file "vdesk")
                (:file "input")
                (:file "window")
                (:file "events")
