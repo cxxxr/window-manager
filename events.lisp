@@ -121,6 +121,11 @@
            (vdesks (vdesks *window-manager*)))
        (when (<= 0 n (1- (length vdesks)))
          (change-to-vdesk (elt vdesks n)))))
+    (:_NET_ACTIVE_WINDOW
+     (alexandria:when-let (window (find-window xwin))
+       (let ((source (elt data 0)))
+         (declare (ignore source))
+         (focus-window window))))
     (:_NET_WM_STATE
      (alexandria:when-let (window (find-window xwin :frame nil))
        (loop :for i :from 1 :to 2

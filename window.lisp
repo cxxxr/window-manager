@@ -44,10 +44,9 @@
 (defun remove-window (window)
   (xlib:with-server-grabbed ((display *window-manager*))
     (when (eq (current-window *window-manager*) window)
-      (setf (current-window *window-manager*)
-            (if (uiop:length=n-p (windows *window-manager*) 1)
-                nil
-                (get-previous-window window))))
+      (focus-window (if (uiop:length=n-p (windows *window-manager*) 1)
+                        nil
+                        (get-previous-window window))))
     (let ((frame (window-frame window)))
       (xlib:destroy-window frame)
       (setf (windows *window-manager*)
@@ -142,15 +141,16 @@
                   (subseq (windows *window-manager*) 0 pos))))))
 
 (defun focus-window (window)
-  (xlib:set-input-focus (display *window-manager*) (window-xwin window) :pointer-root)
   (setf (current-window *window-manager*) window)
-  (update-window-order)
-  (let ((xwin (window-frame window)))
-    (setf (xlib:window-priority xwin) :above)
-    (dolist (w (xlib:query-tree (root *window-manager*)))
-      (dolist (id (xlib:get-property xwin :WM_TRANSIENT_FOR))
-        (when (= id (xlib:window-id xwin))
-          (setf (xlib:window-priority w) :above))))))
+  (when window
+    (xlib:set-input-focus (display *window-manager*) (window-xwin window) :pointer-root)
+    (update-window-order)
+    (let ((xwin (window-frame window)))
+      (setf (xlib:window-priority xwin) :above)
+      (dolist (w (xlib:query-tree (root *window-manager*)))
+        (dolist (id (xlib:get-property xwin :WM_TRANSIENT_FOR))
+          (when (= id (xlib:window-id xwin))
+            (setf (xlib:window-priority w) :above)))))))
 
 (defun get-next-window (window)
   (let ((windows (windows *window-manager*)))
