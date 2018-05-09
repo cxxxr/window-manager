@@ -116,6 +116,11 @@
 
 (define-event-handler :client-message (((:window xwin)) type data)
   (case type
+    (:_NET_CURRENT_DESKTOP
+     (let ((n (elt data 0))
+           (vdesks (vdesks *window-manager*)))
+       (when (<= 0 n (1- (length vdesks)))
+         (change-to-vdesk (elt vdesks n)))))
     (:_NET_WM_STATE
      (alexandria:when-let (window (find-window xwin :frame nil))
        (loop :for i :from 1 :to 2

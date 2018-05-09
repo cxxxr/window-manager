@@ -116,6 +116,12 @@
                                 *netwm-allowed-actions*)
                         :atom 32))
 
+(defun set-net-current-desktop (index)
+  (xlib:change-property (root *window-manager*)
+                        :_NET_CURRENT_DESKTOP
+                        (list index)
+                        :cardinal 32))
+
 (defun update-net-client-list ()
   (xlib:change-property (root *window-manager*)
                         :_NET_CLIENT_LIST
@@ -158,6 +164,7 @@
                         :_NET_DESKTOP_VIEWPORT
                         (list 0 0)
                         :cardinal 32)
+  (set-net-current-desktop 0)
   (let ((w (xlib:create-window :parent (root *window-manager*) :x 0 :y 0 :width 1 :height 1)))
     (setf (supporting *window-manager*) w)
     (xlib:change-property (root *window-manager*)
