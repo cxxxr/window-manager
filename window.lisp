@@ -35,7 +35,7 @@
         (update-net-client-list-stacking)
         (xlib:add-to-save-set xwin)
         (xlib:reparent-window xwin frame 0 +frame-height+)
-        (set-netwm-allowed-actions xwin)
+        (set-net-wm-allowed-actions xwin)
         (cond ((eq (xlib:window-map-state xwin) :viewable)
                (incf (window-count-ignore-unmap window)))
               (t

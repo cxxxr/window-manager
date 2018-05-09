@@ -109,7 +109,7 @@
 (defun (setf wm-state) (state xwin)
   (xlib:change-property xwin :WM_STATE (list state) :WM_STATE 32))
 
-(defun set-netwm-allowed-actions (xwin)
+(defun set-net-wm-allowed-actions (xwin)
   (xlib:change-property xwin :_NET_WM_ALLOWED_ACTIONS
                         (mapcar (lambda (a)
                                   (xlib:intern-atom (display *window-manager*) a))
