@@ -31,8 +31,8 @@
                                    :width (xlib:drawable-width xwin)
                                    :height (xlib:drawable-height xwin))))
         (push window (windows *window-manager*))
-        (update-net-client-list)
-        (update-net-client-list-stacking)
+        (update-net-client-list (windows *window-manager*))
+        (update-net-client-list-stacking (windows *window-manager*))
         (xlib:add-to-save-set xwin)
         (xlib:reparent-window xwin frame 0 +frame-height+)
         (set-net-wm-allowed-actions xwin)
@@ -52,8 +52,8 @@
       (xlib:destroy-window frame)
       (setf (windows *window-manager*)
             (delete window (windows *window-manager*)))
-      (update-net-client-list)
-      (update-net-client-list-stacking))))
+      (update-net-client-list (windows *window-manager*))
+      (update-net-client-list-stacking (windows *window-manager*)))))
 
 (defun hide-window (window)
   (unless (eq (xlib:window-map-state (window-xwin window)) :unmapped)
@@ -136,10 +136,10 @@
 
 (defun update-window-order ()
   (let ((pos (position (current-window *window-manager*) (windows *window-manager*))))
-    (setf (windows *window-manager*)
-          (nconc (subseq (windows *window-manager*) pos)
-                 (subseq (windows *window-manager*) 0 pos)))
-    (update-net-client-list-stacking)))
+    (update-net-client-list-stacking
+     (setf (windows *window-manager*)
+           (nconc (subseq (windows *window-manager*) pos)
+                  (subseq (windows *window-manager*) 0 pos))))))
 
 (defun focus-window (window)
   (xlib:set-input-focus (display *window-manager*) (window-xwin window) :pointer-root)
