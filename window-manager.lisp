@@ -122,14 +122,14 @@
                         (list index)
                         :cardinal 32))
 
-(defun update-net-client-list (windows)
+(defun set-net-client-list (windows)
   (xlib:change-property (root *window-manager*)
                         :_NET_CLIENT_LIST
                         (mapcar #'window-xwin windows)
                         :window 32
                         :transform #'xlib:drawable-id))
 
-(defun update-net-client-list-stacking (windows)
+(defun set-net-client-list-stacking (windows)
   (xlib:change-property (root *window-manager*)
                         :_NET_CLIENT_LIST_STACKING
                         (mapcar #'window-xwin windows)
@@ -153,7 +153,7 @@
                                   (xlib:intern-atom (display *window-manager*) s))
                                 *netwm-supported*)
                         :atom 32)
-  (update-net-client-list (windows *window-manager*))
+  (set-net-client-list (windows *window-manager*))
   (update-net-number-of-desktops)
   (xlib:change-property (root *window-manager*)
                         :_NET_DESKTOP_GEOMETRY
