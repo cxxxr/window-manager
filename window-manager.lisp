@@ -87,6 +87,7 @@
   (vdesk-current-window (current-vdesk *window-manager*)))
 
 (defun (setf current-window) (window *window-manager*)
+  (set-net-active-window (if window (window-xwin window) :none))
   (setf (vdesk-current-window (current-vdesk *window-manager*)) window))
 
 (defun make-window-manager (display)
@@ -121,6 +122,12 @@
                         :_NET_CURRENT_DESKTOP
                         (list index)
                         :cardinal 32))
+
+(defun set-net-active-window (xwin)
+  (xlib:change-property (root *window-manager*)
+                        :_NET_ACTIVE_WINDOW
+                        (list (if (eq xwin :none) xwin (xlib:drawable-id xwin)))
+                        :window 32))
 
 (defun set-net-client-list (windows)
   (xlib:change-property (root *window-manager*)
