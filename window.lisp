@@ -57,13 +57,11 @@
 
 (defun hide-window (window)
   (unless (eq (xlib:window-map-state (window-xwin window)) :unmapped)
-    (incf (window-count-ignore-unmap window))
+    ;(incf (window-count-ignore-unmap window))
     (setf (wm-state (window-xwin window)) +iconic-state+)
-    (xlib:unmap-window (window-frame window))
-    (xlib:unmap-subwindows (window-frame window))))
+    (xlib:unmap-window (window-frame window))))
 
 (defun show-window (window)
-  (xlib:map-subwindows (window-frame window))
   (xlib:map-window (window-frame window))
   (setf (wm-state (window-xwin window)) +normal-state+))
 
