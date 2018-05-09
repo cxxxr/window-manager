@@ -3,7 +3,8 @@
 (defun add-vdesk ()
   (let ((vdesk (make-instance 'vdesk :screen (screen *window-manager*))))
     (alexandria:nconcf (vdesks *window-manager*)
-                       (list vdesk))))
+                       (list vdesk))
+    (update-net-number-of-desktops)))
 
 (defun change-to-vdesk (new-vdesk)
   (let ((old-vdesk (current-vdesk *window-manager*)))
