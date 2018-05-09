@@ -80,14 +80,14 @@
 (defun windows (*window-manager*)
   (vdesk-windows (current-vdesk *window-manager*)))
 
-(defun (setf windows) (value *window-manager*)
-  (setf (vdesk-windows (current-vdesk *window-manager*)) value))
+(defun (setf windows) (windows *window-manager*)
+  (setf (vdesk-windows (current-vdesk *window-manager*)) windows))
 
 (defun current-window (*window-manager*)
   (vdesk-current-window (current-vdesk *window-manager*)))
 
-(defun (setf current-window) (value *window-manager*)
-  (setf (vdesk-current-window (current-vdesk *window-manager*)) value))
+(defun (setf current-window) (window *window-manager*)
+  (setf (vdesk-current-window (current-vdesk *window-manager*)) window))
 
 (defun make-window-manager (display)
   (let* ((display (if display
