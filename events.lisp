@@ -117,13 +117,13 @@
 (define-event-handler :client-message (((:window xwin)) type data)
   (case type
     (:_NET_CURRENT_DESKTOP
-     (let ((n (elt data 0))
+     (let ((n (aref data 0))
            (vdesks (vdesks *window-manager*)))
        (when (<= 0 n (1- (length vdesks)))
          (change-to-vdesk (elt vdesks n)))))
     (:_NET_ACTIVE_WINDOW
      (alexandria:when-let (window (find-window xwin))
-       (let ((source (elt data 0)))
+       (let ((source (aref data 0)))
          (declare (ignore source))
          (focus-window window))))
     (:_NET_CLOSE_WINDOW
