@@ -19,6 +19,10 @@
     ;:_NET_SHOWING_DESKTOP
     ))
 
+(defparameter *other-root-window-messages*
+  '(:_NET_CLOSE_WINDOW
+    ))
+
 (defparameter *netwm-supported*
   '(:_NET_SUPPORTING_WM_CHECK
     :_NET_NUMBER_OF_DESKTOPS

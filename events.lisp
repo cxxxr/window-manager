@@ -126,6 +126,9 @@
        (let ((source (elt data 0)))
          (declare (ignore source))
          (focus-window window))))
+    (:_NET_CLOSE_WINDOW
+     (alexandria:when-let (window (find-widnow xwin))
+       (quit-window window)))
     (:_NET_WM_STATE
      (alexandria:when-let (window (find-window xwin :frame nil))
        (loop :for i :from 1 :to 2
