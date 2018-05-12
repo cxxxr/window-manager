@@ -12,7 +12,7 @@
     :_NET_CURRENT_DESKTOP
     ;:_NET_DESKTOP_NAMES
     :_NET_ACTIVE_WINDOW
-    ;:_NET_WORKAREA
+    :_NET_WORKAREA
     :_NET_SUPPORTING_WM_CHECK
     ;:_NET_VIRTUAL_ROOTS
     ;:_NET_DESKTOP_LAYOUT
@@ -41,6 +41,7 @@
     :_NET_CLIENT_LIST_STACKING
     :_NET_ACTIVE_WINDOW
     :_NET_WM_DESKTOP
+    :_NET_WORKAREA
     :_KDE_NET_SYSTEM_TRAY_WINDOW_FOR))
 
 (defparameter *netwm-allowed-actions*
@@ -189,6 +190,13 @@
                         (list 0 0)
                         :cardinal 32)
   (set-net-current-desktop 0)
+  (xlib:change-property (root *window-manager*)
+                        :_NET_WORKAREA
+                        (list 0
+                              0
+                              (xlib:drawable-width (root *window-manager*))
+                              (xlib:drawable-height (root *window-manager*)))
+                        :cardinal 32)
   (let ((w (xlib:create-window :parent (root *window-manager*) :x 0 :y 0 :width 1 :height 1)))
     (setf (supporting *window-manager*) w)
     (xlib:change-property (root *window-manager*)
