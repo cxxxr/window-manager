@@ -127,7 +127,7 @@
          (declare (ignore source))
          (focus-window window))))
     (:_NET_CLOSE_WINDOW
-     (alexandria:when-let (window (find-widnow xwin))
+     (alexandria:when-let (window (find-window xwin))
        (quit-window window)))
     (:_NET_WM_STATE
      (alexandria:when-let (window (find-window xwin :frame nil))
