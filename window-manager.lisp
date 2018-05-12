@@ -2,6 +2,23 @@
 
 (defvar *window-manager*)
 
+;; TODO
+(defparameter *root-window-properties*
+  '(:_NET_CLIENT_LIST
+    :_NET_CLIENT_LIST_STACKING
+    :_NET_NUMBER_OF_DESKTOPS
+    :_NET_DESKTOP_GEOMETRY
+    :_NET_DESKTOP_VIEWPORT
+    :_NET_CURRENT_DESKTOP
+    ;:_NET_DESKTOP_NAMES
+    :_NET_ACTIVE_WINDOW
+    ;:_NET_WORKAREA
+    :_NET_SUPPORTING_WM_CHECK
+    ;:_NET_VIRTUAL_ROOTS
+    ;:_NET_DESKTOP_LAYOUT
+    ;:_NET_SHOWING_DESKTOP
+    ))
+
 (defparameter *netwm-supported*
   '(:_NET_SUPPORTING_WM_CHECK
     :_NET_NUMBER_OF_DESKTOPS
