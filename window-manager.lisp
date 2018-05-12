@@ -132,6 +132,14 @@
 (defun (setf wm-state) (state xwin)
   (xlib:change-property xwin :WM_STATE (list state) :WM_STATE 32))
 
+(defun send-client-message (xwin type &rest data)
+  (xlib:send-event xwin
+                   :client-message nil
+                   :window xwin
+                   :type type
+                   :format 32
+                   :data data))
+
 (defun set-net-wm-allowed-actions (xwin)
   (xlib:change-property xwin :_NET_WM_ALLOWED_ACTIONS
                         (mapcar (lambda (a)

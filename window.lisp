@@ -65,8 +65,9 @@
   (setf (wm-state (window-xwin window)) +normal-state+))
 
 (defun quit-window (window)
-  (xlib:kill-client (display *window-manager*)
-                    (xlib:window-id (window-xwin window))))
+  (send-client-message (window-xwin window)
+                       :WM_PROTOCOLS
+                       (xlib:intern-atom (display *window-manager*) :WM_DELETE_WINDOW)))
 
 (defun toggle-fullscreen (window)
   (if (window-fullscreen window)
