@@ -2,11 +2,10 @@
 
 (defvar *window-manager*)
 
-;; TODO
 (defparameter *root-window-properties*
   '(:_NET_CLIENT_LIST
     :_NET_CLIENT_LIST_STACKING
-    :_NET_NUMBER_OF_DESKTOPS
+    :_NET_NUMBER_OF_DESKTOPS ;*
     :_NET_DESKTOP_GEOMETRY
     :_NET_DESKTOP_VIEWPORT
     :_NET_CURRENT_DESKTOP
@@ -21,8 +20,14 @@
 
 (defparameter *other-root-window-messages*
   '(:_NET_CLOSE_WINDOW
-    :_NET_MOVERESIZE_WINDOW
+    :_NET_MOVERESIZE_WINDOW ;*
+    ;:_NET_WM_MOVERESIZE
+    ;:_NET_RESTACK_WINDOW
+    ;:_NET_REQUEST_FRAME_EXTENTS
     ))
+
+(defparameter *application-window-properties*
+  '())
 
 (defparameter *netwm-supported*
   '(:_NET_SUPPORTING_WM_CHECK
