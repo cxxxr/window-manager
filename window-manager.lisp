@@ -21,6 +21,7 @@
 
 (defparameter *other-root-window-messages*
   '(:_NET_CLOSE_WINDOW
+    :_NET_MOVERESIZE_WINDOW
     ))
 
 (defparameter *netwm-supported*
@@ -188,7 +189,9 @@
                         :_NET_SUPPORTED
                         (mapcar (lambda (s)
                                   (xlib:intern-atom (display *window-manager*) s))
-                                *netwm-supported*)
+                                (remove-duplicates (append *root-window-properties*
+                                                           *other-root-window-messages*
+                                                           *netwm-supported*)))
                         :atom 32)
   (set-net-client-list (windows *window-manager*))
   (update-net-number-of-desktops)

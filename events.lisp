@@ -129,6 +129,18 @@
     (:_NET_CLOSE_WINDOW
      (alexandria:when-let (window (find-window xwin))
        (quit-window window)))
+    (:_NET_MOVERESIZE_WINDOW
+     ;;TODO
+     (let* ((window (find-window xwin))
+            (gravity-mask (aref data 0))
+            (gravity (ldb (byte 8 0) gravity-mask))
+            (mask (ldb (byte 4 8) gravity-mask))
+            (x (aref data 1))
+            (y (aref data 2))
+            (w (aref data 3))
+            (h (aref data 4)))
+       (declare (ignore gravity mask))
+       (change-window-geometry window :x x :y y :width w :height h)))
     (:_NET_WM_STATE
      (alexandria:when-let (window (find-window xwin :frame nil))
        (loop :for i :from 1 :to 2
