@@ -1,7 +1,8 @@
 (defsystem "liwm"
   :depends-on ("clx"
                "cl-xkeysym"
-               "alexandria")
+               "alexandria"
+               "babel")
   :serial t
   :components ((:file "package")
                (:file "logger")

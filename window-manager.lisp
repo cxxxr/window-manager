@@ -146,6 +146,11 @@
                    :format 32
                    :data data))
 
+(defun get-wm-name (xwin)
+  (or (alexandria:when-let (name (xlib:get-property xwin :_NET_WM_NAME))
+        (babel:octets-to-string (coerce name '(vector (unsigned-byte 8)))))
+      (values (xlib:wm-name xwin))))
+
 (defun set-net-wm-allowed-actions (xwin)
   (xlib:change-property xwin :_NET_WM_ALLOWED_ACTIONS
                         (mapcar (lambda (a)
