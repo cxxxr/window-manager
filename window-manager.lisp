@@ -27,7 +27,7 @@
     ))
 
 (defparameter *application-window-properties*
-  '())
+  '(:_NET_WM_NAME))
 
 (defparameter *netwm-supported*
   '(:_NET_SUPPORTING_WM_CHECK
@@ -227,7 +227,11 @@
     (xlib:change-property w :_NET_SUPPORTING_WM_CHECK
                           (list w)
                           :window 32
-                          :transform #'xlib:drawable-id))
+                          :transform #'xlib:drawable-id)
+    (xlib:change-property w :_NET_WM_NAME
+                          (string-downcase (package-name *package*))
+                          :string 8
+                          :transform #'xlib:char->card8))
   (dolist (xwin (xlib:query-tree (root *window-manager*)))
     (when (and (eq (xlib:window-override-redirect xwin) :off)
                (eq (xlib:window-map-state xwin) :viewable))
