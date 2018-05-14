@@ -11,10 +11,22 @@
   (log-format "(setf current-vdesk) vdesk = ~A" vdesk)
   (set-net-current-desktop (vdesk-index vdesk)))
 
+(defun get-next-vdesk (vdesk)
+  (next-element vdesk (vdesks *window-manager*)))
+
+(defun get-previous-vdesk (vdesk)
+  (previous-element vdesk (vdesks *window-manager*)))
+
 (defun add-vdesk ()
   (let ((vdesk (make-instance 'vdesk :screen (screen *window-manager*))))
     (alexandria:nconcf (vdesks *window-manager*)
                        (list vdesk))))
+
+(defun delete-vdesk (vdesk)
+  (when (< 1 (length (vdesks *window-manager*)))
+    (when (eq vdesk (current-vdesk *window-manager*))
+      (change-to-vdesk (get-next-vdesk vdesk)))
+    (alexandria:deletef (vdesks *window-manager*) vdesk)))
 
 (defun change-to-vdesk (new-vdesk)
   (let ((old-vdesk (current-vdesk *window-manager*)))
