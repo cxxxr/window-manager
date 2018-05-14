@@ -5,6 +5,7 @@
                "babel")
   :serial t
   :components ((:file "package")
+               (:file "util")
                (:file "logger")
                (:file "window-manager")
                (:file "vdesk")

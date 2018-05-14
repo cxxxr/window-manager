@@ -154,17 +154,10 @@
             (setf (xlib:window-priority w) :above)))))))
 
 (defun get-next-window (window)
-  (let ((windows (windows *window-manager*)))
-    (or (second (member window windows))
-        (first windows))))
+  (next-element window (windows *window-manager*)))
 
 (defun get-previous-window (window)
-  (let ((windows (windows *window-manager*)))
-    (if (eq window (first windows))
-        (alexandria:lastcar windows)
-        (loop :for rest :on windows
-              :do (when (eq window (second rest))
-                    (return (first rest)))))))
+  (previous-element window (windows *window-manager*)))
 
 (defun focus-next-window ()
   (unless (null (windows *window-manager*))
