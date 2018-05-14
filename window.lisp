@@ -11,35 +11,37 @@
 
 (defun add-window (xwin)
   (xlib:with-server-grabbed ((display *window-manager*))
-    (let ((frame (xlib:create-window :parent (root *window-manager*)
-                                     :x (xlib:drawable-x xwin)
-                                     :y (xlib:drawable-y xwin)
-                                     :width (xlib:drawable-width xwin)
-                                     :height (+ (xlib:drawable-height xwin) +frame-height+)
-                                     :border-width +border-width+
-                                     :border +frame-color+
-                                     :background +frame-color+
-                                     :event-mask '(:substructure-notify
-                                                   :substructure-redirect
-                                                   :property-change)
-                                     :override-redirect :on)))
-      (let ((window (make-instance 'window
-                                   :xwin xwin
-                                   :frame frame
-                                   :x (xlib:drawable-x xwin)
-                                   :y (xlib:drawable-y xwin)
-                                   :width (xlib:drawable-width xwin)
-                                   :height (xlib:drawable-height xwin))))
-        (push window (windows *window-manager*))
-        (set-net-client-list (windows *window-manager*))
-        (set-net-client-list-stacking (windows *window-manager*))
-        (xlib:add-to-save-set xwin)
-        (xlib:reparent-window xwin frame 0 +frame-height+)
-        (set-net-wm-allowed-actions xwin)
-        (cond ((eq (xlib:window-map-state xwin) :viewable)
-               (incf (window-count-ignore-unmap window)))
-              (t
-               (xlib:map-window frame)))))))
+    (let* ((frame (xlib:create-window :parent (root *window-manager*)
+                                      :x (xlib:drawable-x xwin)
+                                      :y (xlib:drawable-y xwin)
+                                      :width (xlib:drawable-width xwin)
+                                      :height (+ (xlib:drawable-height xwin) +frame-height+)
+                                      :border-width +border-width+
+                                      :border +frame-color+
+                                      :background +frame-color+
+                                      :event-mask '(:substructure-notify
+                                                    :substructure-redirect
+                                                    :property-change)
+                                      :override-redirect :on))
+           (window (make-instance 'window
+                                  :xwin xwin
+                                  :frame frame
+                                  :x (xlib:drawable-x xwin)
+                                  :y (xlib:drawable-y xwin)
+                                  :width (xlib:drawable-width xwin)
+                                  :height (xlib:drawable-height xwin)))
+           (current-vdesk (current-vdesk *window-manager*)))
+      (push window (vdesk-windows current-vdesk))
+      (set-net-wm-desktop xwin (vdesk-index current-vdesk))
+      (set-net-client-list (vdesk-windows current-vdesk))
+      (set-net-client-list-stacking (vdesk-windows current-vdesk))
+      (xlib:add-to-save-set xwin)
+      (xlib:reparent-window xwin frame 0 +frame-height+)
+      (set-net-wm-allowed-actions xwin)
+      (cond ((eq (xlib:window-map-state xwin) :viewable)
+             (incf (window-count-ignore-unmap window)))
+            (t
+             (xlib:map-window frame))))))
 
 (defun remove-window (window)
   (xlib:with-server-grabbed ((display *window-manager*))

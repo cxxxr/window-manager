@@ -27,7 +27,12 @@
     ))
 
 (defparameter *application-window-properties*
-  '(:_NET_WM_NAME))
+  '(:_NET_WM_NAME
+    ;:_NET_WM_VISIBLE_NAME
+    ;:_NET_WM_ICON_NAME
+    ;:_NET_WM_VISIBLE_ICON_NAME
+    :_NET_WM_DESKTOP
+    ))
 
 (defparameter *netwm-supported*
   '(:_NET_SUPPORTING_WM_CHECK
@@ -183,6 +188,18 @@
                         (mapcar #'window-xwin windows)
                         :window 32
                         :transform #'xlib:drawable-id))
+
+(defun set-net-wm-desktop (xwin index)
+  (xlib:change-property xwin
+                        :_NET_WM_DESKTOP
+                        (list index)
+                        :cardinal 32))
+
+(defun update-net-wm-desktop ()
+  (loop :for index :from 0
+        :for vdesk :in (vdesks *window-manager*)
+        :do (dolist (window (vdesk-windows vdesk))
+              (set-net-wm-desktop (window-xwin window) index))))
 
 (defun update-net-number-of-desktops ()
   (xlib:change-property (root *window-manager*)

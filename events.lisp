@@ -141,6 +141,13 @@
             (h (aref data 4)))
        (declare (ignore gravity mask))
        (change-window-geometry window :x x :y y :width w :height h)))
+    (:_NET_WM_DESKTOP
+     (let* ((window (find-window xwin))
+            (n (aref data 0))
+            (vdesk (get-vdesk n)))
+       (when (and window vdesk)
+         ;(move-window-to-vdesk window vdesk)
+         )))
     (:_NET_WM_STATE
      (alexandria:when-let (window (find-window xwin :frame nil))
        (loop :for i :from 1 :to 2

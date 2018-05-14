@@ -20,6 +20,8 @@
                                      (toggle-maximize-window window))))
                        (bind-key (make-key-input "a" :super t)
                                  (lambda () (add-vdesk)))
+                       (bind-key (make-key-input "d" :super t)
+                                 (lambda () (delete-vdesk (current-vdesk *window-manager*))))
                        (bind-key (make-key-input "2" :super t)
                                  (lambda () (change-to-vdesk (second (vdesks *window-manager*)))))
                        (bind-key (make-key-input "1" :super t)

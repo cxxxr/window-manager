@@ -6,9 +6,13 @@
 (defun current-vdesk-index ()
   (vdesk-index (current-vdesk *window-manager*)))
 
+(defun get-vdesk (index)
+  (nth index (vdesks *window-manager*)))
+
 (defmethod (setf vdesks) :after (vdesks (*window-manager* window-manager))
   (log-format "(setf vdesks) vdesks = ~D" (length (vdesks *window-manager*)))
-  (update-net-number-of-desktops))
+  (update-net-number-of-desktops)
+  (update-net-wm-desktop))
 
 (defmethod (setf current-vdesk) :after (vdesk (*window-manager* window-manager))
   (log-format "(setf current-vdesk) vdesk = ~A" vdesk)
