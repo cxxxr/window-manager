@@ -189,10 +189,10 @@
                         :window 32
                         :transform #'xlib:drawable-id))
 
-(defun set-net-wm-desktop (xwin index)
-  (xlib:change-property xwin
+(defun set-net-wm-desktop (window vdesk)
+  (xlib:change-property (window-xwin window)
                         :_NET_WM_DESKTOP
-                        (list index)
+                        (list (vdesk-index vdesk))
                         :cardinal 32))
 
 (defun update-net-wm-desktop ()

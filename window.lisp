@@ -32,7 +32,7 @@
                                   :height (xlib:drawable-height xwin)))
            (current-vdesk (current-vdesk *window-manager*)))
       (push window (vdesk-windows current-vdesk))
-      (set-net-wm-desktop xwin (vdesk-index current-vdesk))
+      (set-net-wm-desktop window current-vdesk)
       (set-net-client-list (vdesk-windows current-vdesk))
       (set-net-client-list-stacking (vdesk-windows current-vdesk))
       (xlib:add-to-save-set xwin)
