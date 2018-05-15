@@ -41,3 +41,19 @@
       (mapc #'show-window (reverse (vdesk-windows new-vdesk)))
       (mapc #'hide-window (vdesk-windows old-vdesk))
       (setf (current-vdesk *window-manager*) new-vdesk))))
+
+(defun find-vdesk-from-window (window)
+  (dolist (vdesk (vdesks *window-manager*))
+    (when (member window (vdesk-windows vdesk))
+      (return vdesk))))
+
+(defun move-window-to-vdesk (window vdesk)
+  ;; TODO: modal window
+  (let ((old-vdesk (find-vdesk-from-window window)))
+    (unless (eq old-vdesk vdesk)
+      (if (eq (current-vdesk *window-manager*) vdesk)
+          (show-window window)
+          (hide-window window))
+      (alexandria:deletef (vdesk-windows old-vdesk) window)
+      (push window (vdesk-windows vdesk))
+      (set-net-wm-desktop window vdesk))))
