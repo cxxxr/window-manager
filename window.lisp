@@ -51,8 +51,7 @@
                         (get-previous-window window))))
     (let ((frame (window-frame window)))
       (xlib:destroy-window frame)
-      (setf (windows *window-manager*)
-            (delete window (windows *window-manager*)))
+      (alexandria:deletef (windows *window-manager*) window)
       (set-net-client-list (windows *window-manager*))
       (set-net-client-list-stacking (windows *window-manager*)))))
 
