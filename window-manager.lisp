@@ -196,10 +196,9 @@
                         :cardinal 32))
 
 (defun update-net-wm-desktop ()
-  (loop :for index :from 0
-        :for vdesk :in (vdesks *window-manager*)
+  (loop :for vdesk :in (vdesks *window-manager*)
         :do (dolist (window (vdesk-windows vdesk))
-              (set-net-wm-desktop (window-xwin window) index))))
+              (set-net-wm-desktop window vdesk))))
 
 (defun update-net-number-of-desktops ()
   (xlib:change-property (root *window-manager*)
