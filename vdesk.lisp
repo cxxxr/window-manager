@@ -57,3 +57,7 @@
       (alexandria:deletef (vdesk-windows old-vdesk) window)
       (push window (vdesk-windows vdesk))
       (set-net-wm-desktop window vdesk))))
+
+(defun remove-vdesk-window (window)
+  (let ((vdesk (find-vdesk-from-window window)))
+    (alexandria:deletef (vdesk-windows vdesk) window)))

@@ -4,10 +4,18 @@
 (defparameter +frame-height+ 12)
 (defparameter +frame-color+ #x808080)
 
+(defun map-all-windows (function)
+  (dolist (vdesk (vdesks *window-manager*))
+    (dolist (window (vdesk-windows vdesk))
+      (funcall function window))))
+
 (defun find-window (xwin &key frame)
-  (if frame
-      (find xwin (windows *window-manager*) :key #'window-frame :test #'xlib:window-equal)
-      (find xwin (windows *window-manager*) :key #'window-xwin :test #'xlib:window-equal)))
+  (map-all-windows (lambda (window)
+                     (when (xlib:window-equal xwin
+                                              (if frame
+                                                  (window-frame window)
+                                                  (window-xwin window)))
+                       (return-from find-window window)))))
 
 (defun add-window (xwin)
   (xlib:with-server-grabbed ((display *window-manager*))
@@ -51,7 +59,7 @@
                         (get-previous-window window))))
     (let ((frame (window-frame window)))
       (xlib:destroy-window frame)
-      (alexandria:deletef (windows *window-manager*) window)
+      (remove-vdesk-window window)
       (set-net-client-list (windows *window-manager*))
       (set-net-client-list-stacking (windows *window-manager*)))))
 
