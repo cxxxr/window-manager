@@ -42,6 +42,10 @@
       (mapc #'hide-window (vdesk-windows old-vdesk))
       (setf (current-vdesk *window-manager*) new-vdesk))))
 
+(defun change-to-nth-vdesk (n)
+  (alexandria:when-let (vdesk (nth n (vdesks *window-manager*)))
+    (change-to-vdesk n)))
+
 (defun find-vdesk-from-window (window)
   (dolist (vdesk (vdesks *window-manager*))
     (when (member window (vdesk-windows vdesk))
@@ -57,6 +61,10 @@
       (alexandria:deletef (vdesk-windows old-vdesk) window)
       (push window (vdesk-windows vdesk))
       (set-net-wm-desktop window vdesk))))
+
+(defun move-window-to-nth-vdesk (window n)
+  (alexandria:when-let (vdesk (nth n (vdesks *window-manager*)))
+    (move-window-to-vdesk window vdesk)))
 
 (defun remove-vdesk-window (window)
   (let ((vdesk (find-vdesk-from-window window)))

@@ -12,4 +12,5 @@
                (:file "input")
                (:file "window")
                (:file "events")
+               (:file "command")
                (:file "liwm")))
