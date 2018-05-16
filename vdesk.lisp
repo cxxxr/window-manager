@@ -44,7 +44,7 @@
 
 (defun change-to-nth-vdesk (n)
   (alexandria:when-let (vdesk (nth n (vdesks *window-manager*)))
-    (change-to-vdesk n)))
+    (change-to-vdesk vdesk)))
 
 (defun find-vdesk-from-window (window)
   (dolist (vdesk (vdesks *window-manager*))
