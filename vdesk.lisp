@@ -16,7 +16,8 @@
 
 (defmethod (setf current-vdesk) :after (vdesk (*window-manager* window-manager))
   (log-format "(setf current-vdesk) vdesk = ~A" vdesk)
-  (set-net-current-desktop (vdesk-index vdesk)))
+  (set-net-current-desktop (vdesk-index vdesk))
+  (focus-window (first (vdesk-windows vdesk))))
 
 (defun get-next-vdesk (vdesk)
   (next-element vdesk (vdesks *window-manager*)))

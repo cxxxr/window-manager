@@ -87,14 +87,14 @@
    (root :initarg :root :reader root)
    (vdesks :initarg :vdesks :accessor vdesks)
    (current-vdesk :initarg :current-vdesk :accessor current-vdesk)
+   (current-window :initform nil :accessor current-window)
    (modifiers :accessor modifiers)
    (binds :initform '() :accessor binds)
    (supporting :accessor supporting)))
 
 (defclass vdesk ()
   ((screen :initarg :screen :accessor vdesk-screen)
-   (windows :initform '() :accessor vdesk-windows)
-   (current-window :initform nil :accessor vdesk-current-window)))
+   (windows :initform '() :accessor vdesk-windows)))
 
 (defclass window ()
   ((xwin :initarg :xwin :reader window-xwin)
@@ -116,12 +116,8 @@
 (defun (setf windows) (windows *window-manager*)
   (setf (vdesk-windows (current-vdesk *window-manager*)) windows))
 
-(defun current-window (*window-manager*)
-  (vdesk-current-window (current-vdesk *window-manager*)))
-
-(defun (setf current-window) (window *window-manager*)
-  (set-net-active-window (if window (window-xwin window) :none))
-  (setf (vdesk-current-window (current-vdesk *window-manager*)) window))
+(defmethod (setf current-window) :after (window (*window-manager* window-manager))
+  (set-net-active-window (if window (window-xwin window) :none)))
 
 (defun make-window-manager (display)
   (let* ((display (if display
