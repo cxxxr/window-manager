@@ -4,6 +4,9 @@
   (start-window-manager
    (make-window-manager display)
    :initialized-hook (lambda ()
+                       (add-vdesk)
+                       (add-vdesk)
+                       (add-vdesk)
                        (bind-key (make-key-input "t" :meta t :control t)
                                  (get-command "xterm"))
                        (bind-key (make-key-input "n" :super t)
