@@ -146,8 +146,7 @@
             (n (aref data 0))
             (vdesk (get-vdesk n)))
        (when (and window vdesk)
-         ;(move-window-to-vdesk window vdesk)
-         )))
+         (move-window-to-vdesk window vdesk))))
     (:_NET_WM_STATE
      (alexandria:when-let (window (find-window xwin :frame nil))
        (loop :for i :from 1 :to 2
