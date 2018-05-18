@@ -32,8 +32,11 @@
 
 (defun delete-vdesk (vdesk)
   (when (< 1 (length (vdesks *window-manager*)))
-    (when (eq vdesk (current-vdesk *window-manager*))
-      (change-to-vdesk (get-next-vdesk vdesk)))
+    (let ((other-vdesk (get-previous-vdesk vdesk)))
+      (dolist (window (vdesk-windows vdesk))
+        (move-window-to-vdesk window other-vdesk))
+      (when (eq vdesk (current-vdesk *window-manager*))
+        (change-to-vdesk other-vdesk)))
     (alexandria:deletef (vdesks *window-manager*) vdesk)))
 
 (defun change-to-vdesk (new-vdesk)
