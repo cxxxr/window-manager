@@ -15,6 +15,8 @@
           :append (vdesk-windows vdesk))))
 
 (defun add-window (xwin)
+  (when (dock-p xwin)
+    (return-from add-window))
   (xlib:with-server-grabbed ((display *window-manager*))
     (let* ((frame (xlib:create-window :parent (root *window-manager*)
                                       :x (xlib:drawable-x xwin)

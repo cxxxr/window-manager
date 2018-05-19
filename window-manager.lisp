@@ -36,20 +36,21 @@
     ))
 
 (defparameter *netwm-window-types*
-  '(:_NET_WM_WINDOW_TYPE_DESKTOP
+  '(;:_NET_WM_WINDOW_TYPE_DESKTOP
     :_NET_WM_WINDOW_TYPE_DOCK
-    :_NET_WM_WINDOW_TYPE_TOOLBAR
-    :_NET_WM_WINDOW_TYPE_MENU
-    :_NET_WM_WINDOW_TYPE_UTILITY
-    :_NET_WM_WINDOW_TYPE_SPLASH
-    :_NET_WM_WINDOW_TYPE_DIALOG
-    :_NET_WM_WINDOW_TYPE_DROPDOWN_MENU
-    :_NET_WM_WINDOW_TYPE_POPUP_MENU
-    :_NET_WM_WINDOW_TYPE_TOOLTIP
-    :_NET_WM_WINDOW_TYPE_NOTIFICATION
-    :_NET_WM_WINDOW_TYPE_COMBO
-    :_NET_WM_WINDOW_TYPE_DND
-    :_NET_WM_WINDOW_TYPE_NORMAL))
+    ;:_NET_WM_WINDOW_TYPE_TOOLBAR
+    ;:_NET_WM_WINDOW_TYPE_MENU
+    ;:_NET_WM_WINDOW_TYPE_UTILITY
+    ;:_NET_WM_WINDOW_TYPE_SPLASH
+    ;:_NET_WM_WINDOW_TYPE_DIALOG
+    ;:_NET_WM_WINDOW_TYPE_DROPDOWN_MENU
+    ;:_NET_WM_WINDOW_TYPE_POPUP_MENU
+    ;:_NET_WM_WINDOW_TYPE_TOOLTIP
+    ;:_NET_WM_WINDOW_TYPE_NOTIFICATION
+    ;:_NET_WM_WINDOW_TYPE_COMBO
+    ;:_NET_WM_WINDOW_TYPE_DND
+    :_NET_WM_WINDOW_TYPE_NORMAL
+    ))
 
 (defparameter *netwm-supported*
   '(:_NET_SUPPORTING_WM_CHECK
@@ -164,6 +165,13 @@
   (or (alexandria:when-let (name (xlib:get-property xwin :_NET_WM_NAME))
         (babel:octets-to-string (coerce name '(vector (unsigned-byte 8)))))
       (values (xlib:wm-name xwin))))
+
+(defun get-net-window-type (xwin)
+  (alexandria:when-let ((atom-id (first (xlib:get-property xwin :_NET_WM_WINDOW_TYPE))))
+    (xlib:atom-name (display *window-manager*) atom-id)))
+
+(defun dock-p (xwin)
+  (eq (get-net-window-type xwin) :_NET_WM_WINDOW_TYPE_DOCK))
 
 (defun set-net-wm-allowed-actions (xwin)
   (xlib:change-property xwin :_NET_WM_ALLOWED_ACTIONS

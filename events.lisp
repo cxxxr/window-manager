@@ -16,7 +16,7 @@
 
 (define-event-handler :button-press (state code child x y time)
   (when child
-    (let ((window (find-window child :frame t)))
+    (alexandria:when-let ((window (find-window child :frame t)))
       (setf *last-mouse-x* x
             *last-mouse-y* y)
       (cond ((move-mouse-input-p state code)
