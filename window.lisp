@@ -54,14 +54,14 @@
 (defun remove-window (window)
   (xlib:with-server-grabbed ((display *window-manager*))
     (when (eq (current-window *window-manager*) window)
-      (focus-window (if (uiop:length=n-p (windows *window-manager*) 1)
+      (focus-window (if (uiop:length=n-p (vdesk-windows (current-vdesk *window-manager*)) 1)
                         nil
                         (get-previous-window window))))
     (let ((frame (window-frame window)))
       (xlib:destroy-window frame)
       (remove-vdesk-window window)
-      (set-net-client-list (windows *window-manager*))
-      (set-net-client-list-stacking (windows *window-manager*)))))
+      (set-net-client-list (vdesk-windows (current-vdesk *window-manager*)))
+      (set-net-client-list-stacking (vdesk-windows (current-vdesk *window-manager*))))))
 
 (defun hide-window (window)
   (unless (eq (xlib:window-map-state (window-xwin window)) :unmapped)
@@ -144,11 +144,11 @@
   (<= 0 (- y (window-y window)) +frame-height+))
 
 (defun update-window-order ()
-  (let ((pos (position (current-window *window-manager*) (windows *window-manager*))))
+  (let ((pos (position (current-window *window-manager*) (vdesk-windows (current-vdesk *window-manager*)))))
     (set-net-client-list-stacking
-     (setf (windows *window-manager*)
-           (nconc (subseq (windows *window-manager*) pos)
-                  (subseq (windows *window-manager*) 0 pos))))))
+     (setf (vdesk-windows (current-vdesk *window-manager*))
+           (nconc (subseq (vdesk-windows (current-vdesk *window-manager*)) pos)
+                  (subseq (vdesk-windows (current-vdesk *window-manager*)) 0 pos))))))
 
 (defun focus-window (window)
   (setf (current-window *window-manager*) window)
@@ -163,17 +163,17 @@
             (setf (xlib:window-priority w) :above)))))))
 
 (defun get-next-window (window)
-  (next-element window (windows *window-manager*)))
+  (next-element window (vdesk-windows (current-vdesk *window-manager*))))
 
 (defun get-previous-window (window)
-  (previous-element window (windows *window-manager*)))
+  (previous-element window (vdesk-windows (current-vdesk *window-manager*))))
 
 (defun focus-next-window ()
-  (unless (null (windows *window-manager*))
+  (unless (null (vdesk-windows (current-vdesk *window-manager*)))
     (focus-window (get-next-window (current-window *window-manager*)))))
 
 (defun focus-previous-window ()
-  (unless (null (windows *window-manager*))
+  (unless (null (vdesk-windows (current-vdesk *window-manager*)))
     (focus-window (get-previous-window (current-window *window-manager*)))))
 
 (defun move-window (window mx my)

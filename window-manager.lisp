@@ -110,12 +110,6 @@
    (count-ignore-unmap :initform 0 :accessor window-count-ignore-unmap)
    (fullscreen :initform nil :accessor window-fullscreen)))
 
-(defun windows (*window-manager*)
-  (vdesk-windows (current-vdesk *window-manager*)))
-
-(defun (setf windows) (windows *window-manager*)
-  (setf (vdesk-windows (current-vdesk *window-manager*)) windows))
-
 (defmethod (setf current-window) :after (window (*window-manager* window-manager))
   (set-net-active-window (if window (window-xwin window) :none)))
 
@@ -215,7 +209,7 @@
                                                            *other-root-window-messages*
                                                            *netwm-supported*)))
                         :atom 32)
-  (set-net-client-list (windows *window-manager*))
+  (set-net-client-list '())
   (update-net-number-of-desktops)
   (xlib:change-property (root *window-manager*)
                         :_NET_DESKTOP_GEOMETRY
@@ -253,7 +247,7 @@
     (when (and (eq (xlib:window-override-redirect xwin) :off)
                (eq (xlib:window-map-state xwin) :viewable))
       (add-window xwin)))
-  (alexandria:when-let (window (first (windows *window-manager*)))
+  (alexandria:when-let (window (first (vdesk-windows (current-vdesk *window-manager*))))
     (focus-window window)))
 
 (defun finalize-window-manager (*window-manager*)
