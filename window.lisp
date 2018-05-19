@@ -42,7 +42,7 @@
       (push window (vdesk-windows current-vdesk))
       (alexandria:nconcf (all-windows *window-manager*) (list window))
       (set-net-wm-desktop window current-vdesk)
-      (set-net-client-list (vdesk-windows current-vdesk))
+      (update-net-client-list)
       (set-net-client-list-stacking (vdesk-windows current-vdesk))
       (xlib:add-to-save-set xwin)
       (xlib:reparent-window xwin frame 0 +frame-height+)
@@ -62,7 +62,7 @@
       (xlib:destroy-window frame)
       (remove-vdesk-window window)
       (alexandria:deletef (all-windows *window-manager*) window)
-      (set-net-client-list (vdesk-windows (current-vdesk *window-manager*)))
+      (update-net-client-list)
       (set-net-client-list-stacking (vdesk-windows (current-vdesk *window-manager*))))))
 
 (defun hide-window (window)

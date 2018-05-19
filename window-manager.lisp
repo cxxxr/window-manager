@@ -91,7 +91,7 @@
    (modifiers :accessor modifiers)
    (binds :initform '() :accessor binds)
    (supporting :accessor supporting)
-   (all-windows :accessor all-windows)))
+   (all-windows :initform '() :accessor all-windows)))
 
 (defclass vdesk ()
   ((screen :initarg :screen :accessor vdesk-screen)
@@ -166,13 +166,6 @@
                         (list (if (eq xwin :none) xwin (xlib:drawable-id xwin)))
                         :window 32))
 
-(defun set-net-client-list (windows)
-  (xlib:change-property (root *window-manager*)
-                        :_NET_CLIENT_LIST
-                        (mapcar #'window-xwin windows)
-                        :window 32
-                        :transform #'xlib:drawable-id))
-
 (defun set-net-client-list-stacking (windows)
   (xlib:change-property (root *window-manager*)
                         :_NET_CLIENT_LIST_STACKING
@@ -185,6 +178,14 @@
                         :_NET_WM_DESKTOP
                         (list (vdesk-index vdesk))
                         :cardinal 32))
+
+(defun update-net-client-list ()
+  (xlib:change-property (root *window-manager*)
+                        :_NET_CLIENT_LIST
+                        (all-windows *window-manager*)
+                        :window 32
+                        :transform (lambda (window)
+                                     (xlib:drawable-id (window-xwin window)))))
 
 (defun update-net-wm-desktop ()
   (loop :for vdesk :in (vdesks *window-manager*)
@@ -210,7 +211,7 @@
                                                            *other-root-window-messages*
                                                            *netwm-supported*)))
                         :atom 32)
-  (set-net-client-list '())
+  (update-net-client-list)
   (update-net-number-of-desktops)
   (xlib:change-property (root *window-manager*)
                         :_NET_DESKTOP_GEOMETRY
