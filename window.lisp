@@ -56,9 +56,7 @@
   (log-format "remove-window: ~A" window)
   (xlib:with-server-grabbed ((display *window-manager*))
     (when (eq (current-window *window-manager*) window)
-      (focus-window (if (uiop:length=n-p (vdesk-windows (current-vdesk *window-manager*)) 1)
-                        nil
-                        (get-previous-window window))))
+      (setf (current-window *window-manager*) nil))
     (let ((frame (window-frame window)))
       (xlib:destroy-window frame)
       (remove-vdesk-window window)
@@ -154,6 +152,7 @@
   (update-net-client-list-stacking))
 
 (defun focus-window (window)
+  (log-format "focus-window: ~A" window)
   (setf (current-window *window-manager*) window)
   (when window
     (xlib:set-input-focus (display *window-manager*) (window-xwin window) :pointer-root)
