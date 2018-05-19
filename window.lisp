@@ -15,6 +15,7 @@
           :append (vdesk-windows vdesk))))
 
 (defun add-window (xwin)
+  (log-format "add-window: ~A type=~A" xwin (get-net-window-type xwin))
   (when (dock-p xwin)
     (return-from add-window))
   (xlib:with-server-grabbed ((display *window-manager*))
@@ -52,6 +53,7 @@
              (xlib:map-window frame))))))
 
 (defun remove-window (window)
+  (log-format "remove-window: ~A" window)
   (xlib:with-server-grabbed ((display *window-manager*))
     (when (eq (current-window *window-manager*) window)
       (focus-window (if (uiop:length=n-p (vdesk-windows (current-vdesk *window-manager*)) 1)

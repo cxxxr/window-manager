@@ -88,17 +88,20 @@
              (when (has-border) (setf (xlib:drawable-border-width xwin) border-width)))))))
 
 (define-event-handler :map-request (window)
+  (log-format "map-request: ~A" window)
   (cond ((find-window window :frame nil))
         (t
          (add-window window)
          (xlib:map-window window))))
 
 (define-event-handler :map-notify (window override-redirect-p)
+  (log-format "map-notify: ~@{~S ~}" window override-redirect-p)
   (unless override-redirect-p
     (alexandria:when-let (window (find-window window :frame nil))
       (focus-window window))))
 
 (define-event-handler :unmap-notify (window event-window)
+  (log-format "unmap-notify: ~@{~S ~}" window event-window)
   (unless (xlib:window-equal (root *window-manager*) event-window)
     (alexandria:when-let (window (find-window window :frame nil))
       (if (plusp (window-count-ignore-unmap window))
@@ -115,6 +118,7 @@
      (toggle-fullscreen window))))
 
 (define-event-handler :client-message (((:window xwin)) type data)
+  (log-format "client-message: ~@{~S ~}" xwin type data)
   (case type
     (:_NET_CURRENT_DESKTOP
      (let ((n (aref data 0))
@@ -155,7 +159,6 @@
                     (change-fullscreen window (aref data 0)))))))))
 
 (defun handle-event (&rest event-slots &key event-key &allow-other-keys)
-  (log-format "~A" event-key)
   (let ((fn (gethash event-key *event-table*)))
     (when fn
       (apply fn event-slots))))
