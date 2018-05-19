@@ -32,7 +32,24 @@
     ;:_NET_WM_ICON_NAME
     ;:_NET_WM_VISIBLE_ICON_NAME
     :_NET_WM_DESKTOP
+    :_NET_WM_WINDOW_TYPE
     ))
+
+(defparameter *netwm-window-types*
+  '(:_NET_WM_WINDOW_TYPE_DESKTOP
+    :_NET_WM_WINDOW_TYPE_DOCK
+    :_NET_WM_WINDOW_TYPE_TOOLBAR
+    :_NET_WM_WINDOW_TYPE_MENU
+    :_NET_WM_WINDOW_TYPE_UTILITY
+    :_NET_WM_WINDOW_TYPE_SPLASH
+    :_NET_WM_WINDOW_TYPE_DIALOG
+    :_NET_WM_WINDOW_TYPE_DROPDOWN_MENU
+    :_NET_WM_WINDOW_TYPE_POPUP_MENU
+    :_NET_WM_WINDOW_TYPE_TOOLTIP
+    :_NET_WM_WINDOW_TYPE_NOTIFICATION
+    :_NET_WM_WINDOW_TYPE_COMBO
+    :_NET_WM_WINDOW_TYPE_DND
+    :_NET_WM_WINDOW_TYPE_NORMAL))
 
 (defparameter *netwm-supported*
   '(:_NET_SUPPORTING_WM_CHECK
@@ -212,6 +229,7 @@
                                 (remove-duplicates (append *netwm-root-window-properties*
                                                            *netwm-other-root-window-messages*
                                                            *netwm-application-window-properties*
+                                                           *netwm-window-types*
                                                            *netwm-supported*)))
                         :atom 32)
   (update-net-client-list)
