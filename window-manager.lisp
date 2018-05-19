@@ -91,7 +91,8 @@
    (modifiers :accessor modifiers)
    (binds :initform '() :accessor binds)
    (supporting :accessor supporting)
-   (all-windows :initform '() :accessor all-windows)))
+   (all-windows :initform '() :accessor all-windows
+                :documentation "starting with the oldest window (_NET_WM_CLIENT_LIST)")))
 
 (defclass vdesk ()
   ((screen :initarg :screen :accessor vdesk-screen)
