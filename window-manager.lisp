@@ -2,7 +2,7 @@
 
 (defvar *window-manager*)
 
-(defparameter *root-window-properties*
+(defparameter *netwm-root-window-properties*
   '(:_NET_CLIENT_LIST
     :_NET_CLIENT_LIST_STACKING
     :_NET_NUMBER_OF_DESKTOPS ;*
@@ -18,7 +18,7 @@
     ;:_NET_SHOWING_DESKTOP
     ))
 
-(defparameter *other-root-window-messages*
+(defparameter *netwm-other-root-window-messages*
   '(:_NET_CLOSE_WINDOW
     :_NET_MOVERESIZE_WINDOW ;*
     ;:_NET_WM_MOVERESIZE
@@ -26,7 +26,7 @@
     ;:_NET_REQUEST_FRAME_EXTENTS
     ))
 
-(defparameter *application-window-properties*
+(defparameter *netwm-application-window-properties*
   '(:_NET_WM_NAME
     ;:_NET_WM_VISIBLE_NAME
     ;:_NET_WM_ICON_NAME
@@ -209,8 +209,9 @@
                         :_NET_SUPPORTED
                         (mapcar (lambda (s)
                                   (xlib:intern-atom (display *window-manager*) s))
-                                (remove-duplicates (append *root-window-properties*
-                                                           *other-root-window-messages*
+                                (remove-duplicates (append *netwm-root-window-properties*
+                                                           *netwm-other-root-window-messages*
+                                                           *netwm-application-window-properties*
                                                            *netwm-supported*)))
                         :atom 32)
   (update-net-client-list)
