@@ -4,18 +4,10 @@
 (defparameter +frame-height+ 12)
 (defparameter +frame-color+ #x808080)
 
-(defun map-all-windows (function)
-  (dolist (vdesk (vdesks *window-manager*))
-    (dolist (window (vdesk-windows vdesk))
-      (funcall function window))))
-
 (defun find-window (xwin &key frame)
-  (map-all-windows (lambda (window)
-                     (when (xlib:window-equal xwin
-                                              (if frame
-                                                  (window-frame window)
-                                                  (window-xwin window)))
-                       (return-from find-window window)))))
+  (find xwin (all-windows *window-manager*)
+        :key (if frame #'window-frame #'window-xwin)
+        :test #'xlib:window-equal))
 
 (defun add-window (xwin)
   (xlib:with-server-grabbed ((display *window-manager*))
