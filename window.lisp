@@ -1,4 +1,4 @@
-(in-package :liwm)
+(in-package :window-manager)
 
 (defparameter +border-width+ 4)
 (defparameter +frame-height+ 12)

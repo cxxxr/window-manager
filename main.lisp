@@ -1,4 +1,4 @@
-(in-package :liwm)
+(in-package :window-manager)
 
 (defun main (&key display)
   (start-window-manager

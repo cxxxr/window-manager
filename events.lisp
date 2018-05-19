@@ -1,4 +1,4 @@
-(in-package :liwm)
+(in-package :window-manager)
 
 (defvar *last-mouse-x* 0)
 (defvar *last-mouse-y* 0)

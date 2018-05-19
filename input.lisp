@@ -1,4 +1,4 @@
-(in-package :liwm)
+(in-package :window-manager)
 
 (defstruct modifiers
   meta

@@ -1,3 +1,3 @@
-(defpackage :liwm
+(defpackage :window-manager
   (:use :cl)
   (:export :main))

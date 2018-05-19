@@ -1,4 +1,4 @@
-(in-package :liwm)
+(in-package :window-manager)
 
 (defvar *logger-stream* *error-output*)
 

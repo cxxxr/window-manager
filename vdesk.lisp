@@ -1,4 +1,4 @@
-(in-package :liwm)
+(in-package :window-manager)
 
 (defun vdesk-index (vdesk)
   (position vdesk (vdesks *window-manager*)))

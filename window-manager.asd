@@ -1,4 +1,4 @@
-(defsystem "liwm"
+(defsystem "window-manager"
   :depends-on ("clx"
                "cl-xkeysym"
                "alexandria"
@@ -13,4 +13,4 @@
                (:file "window")
                (:file "events")
                (:file "command")
-               (:file "liwm")))
+               (:file "main")))

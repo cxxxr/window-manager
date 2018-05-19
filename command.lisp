@@ -1,4 +1,4 @@
-(in-package :liwm)
+(in-package :window-manager)
 
 (defvar *command-table* (make-hash-table :test 'equal))
 
