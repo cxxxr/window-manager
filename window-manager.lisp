@@ -90,7 +90,8 @@
    (current-window :initform nil :accessor current-window)
    (modifiers :accessor modifiers)
    (binds :initform '() :accessor binds)
-   (supporting :accessor supporting)))
+   (supporting :accessor supporting)
+   (all-windows :accessor all-windows)))
 
 (defclass vdesk ()
   ((screen :initarg :screen :accessor vdesk-screen)

@@ -40,6 +40,7 @@
                                   :height (xlib:drawable-height xwin)))
            (current-vdesk (current-vdesk *window-manager*)))
       (push window (vdesk-windows current-vdesk))
+      (alexandria:nconcf (all-windows *window-manager*) (list window))
       (set-net-wm-desktop window current-vdesk)
       (set-net-client-list (vdesk-windows current-vdesk))
       (set-net-client-list-stacking (vdesk-windows current-vdesk))
@@ -60,6 +61,7 @@
     (let ((frame (window-frame window)))
       (xlib:destroy-window frame)
       (remove-vdesk-window window)
+      (alexandria:deletef (all-windows *window-manager*) window)
       (set-net-client-list (vdesk-windows (current-vdesk *window-manager*)))
       (set-net-client-list-stacking (vdesk-windows (current-vdesk *window-manager*))))))
 
