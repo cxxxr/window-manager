@@ -166,13 +166,6 @@
                         (list (if (eq xwin :none) xwin (xlib:drawable-id xwin)))
                         :window 32))
 
-(defun set-net-client-list-stacking (windows)
-  (xlib:change-property (root *window-manager*)
-                        :_NET_CLIENT_LIST_STACKING
-                        (mapcar #'window-xwin windows)
-                        :window 32
-                        :transform #'xlib:drawable-id))
-
 (defun set-net-wm-desktop (window vdesk)
   (xlib:change-property (window-xwin window)
                         :_NET_WM_DESKTOP
@@ -183,6 +176,14 @@
   (xlib:change-property (root *window-manager*)
                         :_NET_CLIENT_LIST
                         (all-windows *window-manager*)
+                        :window 32
+                        :transform (lambda (window)
+                                     (xlib:drawable-id (window-xwin window)))))
+
+(defun update-net-client-list-stacking ()
+  (xlib:change-property (root *window-manager*)
+                        :_NET_CLIENT_LIST_STACKING
+                        (all-ordered-windows)
                         :window 32
                         :transform (lambda (window)
                                      (xlib:drawable-id (window-xwin window)))))

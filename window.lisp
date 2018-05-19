@@ -9,6 +9,11 @@
         :key (if frame #'window-frame #'window-xwin)
         :test #'xlib:window-equal))
 
+(defun all-ordered-windows ()
+  (let ((current-vdesk (current-vdesk *window-manager*)))
+    (loop :for vdesk :in (cons current-vdesk (remove current-vdesk (vdesks *window-manager*)))
+          :append (vdesk-windows vdesk))))
+
 (defun add-window (xwin)
   (xlib:with-server-grabbed ((display *window-manager*))
     (let* ((frame (xlib:create-window :parent (root *window-manager*)
@@ -35,7 +40,7 @@
       (alexandria:nconcf (all-windows *window-manager*) (list window))
       (set-net-wm-desktop window current-vdesk)
       (update-net-client-list)
-      (set-net-client-list-stacking (vdesk-windows current-vdesk))
+      (update-net-client-list-stacking)
       (xlib:add-to-save-set xwin)
       (xlib:reparent-window xwin frame 0 +frame-height+)
       (set-net-wm-allowed-actions xwin)
@@ -55,7 +60,7 @@
       (remove-vdesk-window window)
       (alexandria:deletef (all-windows *window-manager*) window)
       (update-net-client-list)
-      (set-net-client-list-stacking (vdesk-windows (current-vdesk *window-manager*))))))
+      (update-net-client-list-stacking))))
 
 (defun hide-window (window)
   (unless (eq (xlib:window-map-state (window-xwin window)) :unmapped)
@@ -139,10 +144,10 @@
 
 (defun update-window-order ()
   (let ((pos (position (current-window *window-manager*) (vdesk-windows (current-vdesk *window-manager*)))))
-    (set-net-client-list-stacking
-     (setf (vdesk-windows (current-vdesk *window-manager*))
-           (nconc (subseq (vdesk-windows (current-vdesk *window-manager*)) pos)
-                  (subseq (vdesk-windows (current-vdesk *window-manager*)) 0 pos))))))
+    (setf (vdesk-windows (current-vdesk *window-manager*))
+          (nconc (subseq (vdesk-windows (current-vdesk *window-manager*)) pos)
+                 (subseq (vdesk-windows (current-vdesk *window-manager*)) 0 pos))))
+  (update-net-client-list-stacking))
 
 (defun focus-window (window)
   (setf (current-window *window-manager*) window)
