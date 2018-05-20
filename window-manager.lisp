@@ -33,6 +33,20 @@
     ;:_NET_WM_VISIBLE_ICON_NAME
     :_NET_WM_DESKTOP
     :_NET_WM_WINDOW_TYPE
+    :_NET_WM_STATE
+    ;:_NET_WM_STATE_MODAL
+    ;:_NET_WM_STATE_STICKY
+    :_NET_WM_STATE_MAXIMIZED_VERT
+    :_NET_WM_STATE_MAXIMIZED_HORZ
+    ;:_NET_WM_STATE_SHADED
+    ;:_NET_WM_STATE_SKIP_TASKBAR
+    ;:_NET_WM_STATE_SKIP_PAGER
+    ;:_NET_WM_STATE_HIDDEN
+    ;:_NET_WM_STATE_FULLSCREEN
+    ;:_NET_WM_STATE_ABOVE
+    ;:_NET_WM_STATE_BELOW
+    ;:_NET_WM_STATE_DEMANDS_ATTENTION
+    ;:_NET_WM_STATE_FOCUSED
     ))
 
 (defparameter *netwm-window-types*
@@ -60,8 +74,8 @@
     :_NET_CURRENT_DESKTOP
     :_NET_WM_WINDOW_TYPE
     :_NET_WM_STATE
-    :_NET_WM_STATE_MAXIMiZED_VERT
-    :_NET_WM_STATE_MAXIMiZED_HORZ
+    :_NET_WM_STATE_MAXIMIZED_VERT
+    :_NET_WM_STATE_MAXIMIZED_HORZ
     :_NET_WM_STATE_FULLSCREEN
     :_NET_WM_STATE_MODAL
     :_NET_WM_ALLOWED_ACTIONS
@@ -197,6 +211,13 @@
                         :_NET_WM_DESKTOP
                         (list (vdesk-index vdesk))
                         :cardinal 32))
+
+(defun set-net-wm-state (xwin states &optional (mode :replace))
+  (xlib:change-property xwin :_NET_WM_STATE
+                        (loop :for state :in states
+                              :collect (xlib:find-atom (display *window-manager*) state))
+                        :atom 32
+                        :mode mode))
 
 (defun update-net-client-list ()
   (xlib:change-property (root *window-manager*)

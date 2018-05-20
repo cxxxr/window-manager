@@ -108,15 +108,10 @@
                      (xlib:drawable-height (root *window-manager*))
                      (- (xlib:drawable-height (root *window-manager*))
                         (+ +frame-height+ +border-width+))))
-    (xlib:change-property (window-xwin window) :_NET_WM_STATE
-                          (list* (xlib:find-atom (display *window-manager*)
-                                                 :_NET_WM_STATE_MAXIMIZED_VERT)
-                                 (xlib:find-atom (display *window-manager*)
-                                                 :_NET_WM_STATE_MAXIMIZED_HORZ)
-                                 (if fullscreen
-                                     (list (xlib:find-atom (display *window-manager*)
-                                                           :_NET_WM_STATE_FULLSCREEN))))
-                          :atom 32)
+    (set-net-wm-state (window-xwin window)
+                      (list* :_NET_WM_STATE_MAXIMIZED_VERT
+                             :_NET_WM_STATE_MAXIMIZED_HORZ
+                             (and fullscreen (list :_NET_WM_STATE_FULLSCREEN))))
     (change-window-geometry window :x x :y y :width width :height height)))
 
 (defun unmaximize-window (window &optional fullscreen)
@@ -130,9 +125,7 @@
           (window-old-y window) nil
           (window-old-width window) nil
           (window-old-height window) nil)
-    (xlib:change-property (window-xwin window) :_NET_WM_STATE
-                          '()
-                          :atom 32)
+    (set-net-wm-state (window-xwin window))
     (change-window-geometry window :x x :y y :width width :height height)))
 
 (defun toggle-maximize-window (window)
