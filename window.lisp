@@ -64,15 +64,36 @@
       (update-net-client-list)
       (update-net-client-list-stacking))))
 
-(defun hide-window (window)
+(defun hide-window-xwin (window)
   (unless (eq (xlib:window-map-state (window-xwin window)) :unmapped)
     ;(incf (window-count-ignore-unmap window))
     (setf (wm-state (window-xwin window)) +iconic-state+)
     (xlib:unmap-window (window-frame window))))
 
-(defun show-window (window)
+(defun hide-window (window)
+  (unless (window-hidden-p window)
+    (setf (window-hidden-p window) t)
+    (let ((vdesk (find-vdesk-from-window window)))
+      (let ((pos (position window (vdesk-windows vdesk))))
+        (setf (vdesk-windows vdesk)
+              (nconc (subseq (vdesk-windows vdesk) 0 pos)
+                     (subseq (vdesk-windows vdesk) (1+ pos))
+                     (list window))))
+      (update-net-client-list-stacking)
+      (when (eq window (current-window *window-manager*))
+        (setf (current-window *window-manager*) nil))
+      (when (eq vdesk (current-vdesk *window-manager*))
+        (hide-window-xwin window)))))
+
+(defun show-window-xwin (window)
   (xlib:map-window (window-frame window))
   (setf (wm-state (window-xwin window)) +normal-state+))
+
+(defun show-window (window)
+  (setf (window-hidden-p window) nil)
+  (when (eq (find-vdesk-from-window window)
+            (current-vdesk *window-manager*))
+    (show-window-xwin window)))
 
 (defun quit-window (window)
   (send-client-message (window-xwin window)
@@ -108,7 +129,7 @@
                      (xlib:drawable-height (root *window-manager*))
                      (- (xlib:drawable-height (root *window-manager*))
                         (+ +frame-height+ +border-width+))))
-    (set-net-wm-state (window-xwin window)
+    (add-net-wm-state (window-xwin window)
                       (list* :_NET_WM_STATE_MAXIMIZED_VERT
                              :_NET_WM_STATE_MAXIMIZED_HORZ
                              (and fullscreen (list :_NET_WM_STATE_FULLSCREEN))))
@@ -125,7 +146,10 @@
           (window-old-y window) nil
           (window-old-width window) nil
           (window-old-height window) nil)
-    (set-net-wm-state (window-xwin window))
+    (remove-net-wm-state (window-xwin window)
+                         '(:_NET_WM_STATE_MAXIMIZED_VERT
+                           :_NET_WM_STATE_MAXIMIZED_HORZ
+                           :_NET_WM_STATE_FULLSCREEN))
     (change-window-geometry window :x x :y y :width width :height height)))
 
 (defun toggle-maximize-window (window)
@@ -148,6 +172,8 @@
   (log-format "focus-window: ~A" window)
   (setf (current-window *window-manager*) window)
   (when window
+    (when (window-hidden-p window)
+      (show-window window))
     (xlib:set-input-focus (display *window-manager*) (window-xwin window) :pointer-root)
     (update-window-order)
     (let ((xwin (window-frame window)))

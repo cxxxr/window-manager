@@ -34,4 +34,7 @@
                        (bind-key (make-key-input "3" :super t :control t)
                                  (get-command "move window to desktop 3"))
                        (bind-key (make-key-input "4" :super t :control t)
-                                 (get-command "move window to desktop 4")))))
+                                 (get-command "move window to desktop 4"))
+
+                       (bind-key (make-key-input "F9" :meta t)
+                                 (lambda () (hide-window (current-window *window-manager*)))))))

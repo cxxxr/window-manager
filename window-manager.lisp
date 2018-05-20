@@ -142,10 +142,16 @@
    (old-width :initform nil :accessor window-old-width)
    (old-height :initform nil :accessor window-old-height)
    (count-ignore-unmap :initform 0 :accessor window-count-ignore-unmap)
-   (fullscreen :initform nil :accessor window-fullscreen)))
+   (fullscreen :initform nil :accessor window-fullscreen)
+   (hidden-p :initform nil :accessor window-hidden-p)))
 
 (defmethod (setf current-window) :after (window (*window-manager* window-manager))
   (set-net-active-window (if window (window-xwin window) :none)))
+
+(defmethod (setf window-hidden-p) :after (boolean (window window))
+  (if boolean
+      (add-net-wm-state (window-xwin window) :_NET_WM_STATE_HIDDEN)
+      (remove-net-wm-state (window-xwin window) :_NET_WM_STATE_HIDDEN)))
 
 (defun make-window-manager (display)
   (let* ((display (if display
@@ -212,12 +218,26 @@
                         (list (vdesk-index vdesk))
                         :cardinal 32))
 
-(defun set-net-wm-state (xwin states &optional (mode :replace))
-  (xlib:change-property xwin :_NET_WM_STATE
-                        (loop :for state :in states
-                              :collect (xlib:find-atom (display *window-manager*) state))
-                        :atom 32
-                        :mode mode))
+(defun get-net-wm-state (xwin)
+  (loop :for id :in (xlib:get-property xwin :_NET_WM_STATE)
+        :collect (xlib:atom-name (display *window-manager*) id)))
+
+(defun add-net-wm-state (xwin states)
+  (let ((states (uiop:ensure-list states)))
+    (xlib:change-property xwin :_NET_WM_STATE
+                          (loop :for state :in states
+                                :collect (xlib:find-atom (display *window-manager*) state))
+                          :atom 32
+                          :mode :append)))
+
+(defun remove-net-wm-state (xwin states)
+  (let ((states (uiop:ensure-list states)))
+    (dolist (state states)
+      (xlib:change-property xwin :_NET_WM_STATE
+                            (delete (xlib:find-atom (display *window-manager*) state)
+                                    (xlib:get-property xwin :_NET_WM_STATE))
+                            :atom 32
+                            :mode :replace))))
 
 (defun update-net-client-list ()
   (xlib:change-property (root *window-manager*)
