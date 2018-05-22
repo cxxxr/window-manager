@@ -17,6 +17,8 @@
                                  (get-command "quit window"))
                        (bind-key (make-key-input "x" :super t)
                                  (get-command "maximize window"))
+                       (bind-key (make-key-input "F9" :meta t)
+                                 (get-command "minimize window"))
 
                        (bind-key (make-key-input "1" :super t)
                                  (get-command "change desktop 1"))
@@ -34,7 +36,4 @@
                        (bind-key (make-key-input "3" :super t :control t)
                                  (get-command "move window to desktop 3"))
                        (bind-key (make-key-input "4" :super t :control t)
-                                 (get-command "move window to desktop 4"))
-
-                       (bind-key (make-key-input "F9" :meta t)
-                                 (lambda () (hide-window (current-window *window-manager*)))))))
+                                 (get-command "move window to desktop 4")))))

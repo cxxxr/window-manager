@@ -29,6 +29,10 @@
   (alexandria:when-let (window (current-window *window-manager*))
     (toggle-maximize-window window)))
 
+(define-command "minimize window"
+  (alexandria:when-let (window (current-window *window-manager*))
+    (hide-window window)))
+
 (macrolet ((def (n)
              `(progn
                 (define-command ,(format nil "change desktop ~D" (1+ n))
