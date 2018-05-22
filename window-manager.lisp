@@ -47,6 +47,7 @@
     ;:_NET_WM_STATE_BELOW
     ;:_NET_WM_STATE_DEMANDS_ATTENTION
     ;:_NET_WM_STATE_FOCUSED
+    :_NET_WM_ALLOWED_ACTIONS
     ))
 
 (defparameter *netwm-window-types*
@@ -94,16 +95,17 @@
 (defparameter *netwm-allowed-actions*
   '(:_NET_WM_ACTION_MOVE
     :_NET_WM_ACTION_RESIZE
-    :_NET_WM_ACTION_MINIMIZE
-    :_NET_WM_ACTION_SHADE
-    :_NET_WM_ACTION_STICK
+    ;:_NET_WM_ACTION_MINIMIZE
+    ;:_NET_WM_ACTION_SHADE
+    ;:_NET_WM_ACTION_STICK
     :_NET_WM_ACTION_MAXIMIZE_HORZ
     :_NET_WM_ACTION_MAXIMIZE_VERT
     :_NET_WM_ACTION_FULLSCREEN
     :_NET_WM_ACTION_CHANGE_DESKTOP
     :_NET_WM_ACTION_CLOSE
-    :_NET_WM_ACTION_ABOVE
-    :_NET_WM_ACTION_BELOW))
+    ;:_NET_WM_ACTION_ABOVE
+    ;:_NET_WM_ACTION_BELOW
+    ))
 
 (defparameter +net-wm-state-remove+ 0)
 (defparameter +net-wm-state-add+ 1)
@@ -193,7 +195,7 @@
 (defun dock-p (xwin)
   (eq (get-net-window-type xwin) :_NET_WM_WINDOW_TYPE_DOCK))
 
-(defun set-net-wm-allowed-actions (xwin)
+(defun init-net-wm-allowed-actions (xwin)
   (xlib:change-property xwin :_NET_WM_ALLOWED_ACTIONS
                         (mapcar (lambda (a)
                                   (xlib:intern-atom (display *window-manager*) a))
