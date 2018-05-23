@@ -48,6 +48,15 @@
     ;:_NET_WM_STATE_DEMANDS_ATTENTION
     ;:_NET_WM_STATE_FOCUSED
     :_NET_WM_ALLOWED_ACTIONS
+    ;:_NET_WM_STRUT
+    ;:_NET_WM_STRUT_PARTIAL
+    ;:_NET_WM_ICON_GEOMETRY
+    ;:_NET_WM_ICON
+    ;:_NET_WM_PID
+    ;:_NET_WM_HANDLED_ICONS
+    ;:_NET_WM_USER_TIME
+    ;:_NET_WM_USER_TIME_WINDOW
+    :_NET_FRAME_EXTENTS
     ))
 
 (defparameter *netwm-window-types*
@@ -218,6 +227,12 @@
   (xlib:change-property (window-xwin window)
                         :_NET_WM_DESKTOP
                         (list (vdesk-index vdesk))
+                        :cardinal 32))
+
+(defun set-net-frame-extents (xwin extents)
+  (xlib:change-property xwin
+                        :_NET_FRAME_EXTENTS
+                        extents
                         :cardinal 32))
 
 (defun get-net-wm-state (xwin)

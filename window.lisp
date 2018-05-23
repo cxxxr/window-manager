@@ -14,6 +14,13 @@
     (loop :for vdesk :in (cons current-vdesk (remove current-vdesk (vdesks *window-manager*)))
           :append (vdesk-windows vdesk))))
 
+(defun get-frame-extents (window)
+  (declare (ignore window))
+  (list +border-width+
+        +border-width+
+        +frame-height+
+        +border-width+))
+
 (defun add-window (xwin)
   (log-format "add-window: ~A type=~A" xwin (get-net-window-type xwin))
   (when (dock-p xwin)
@@ -42,6 +49,7 @@
       (push window (vdesk-windows current-vdesk))
       (alexandria:nconcf (all-windows *window-manager*) (list window))
       (set-net-wm-desktop window current-vdesk)
+      (set-net-frame-extents (window-xwin window) (get-frame-extents window))
       (update-net-client-list)
       (update-net-client-list-stacking)
       (xlib:add-to-save-set xwin)
