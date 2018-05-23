@@ -55,6 +55,7 @@
 
 (define-event-handler :configure-request (((:window xwin)) x y width height border-width value-mask stack-mode)
   (declare (ignore stack-mode))
+  (log-format "configure-request: ~@{~S ~}" xwin x y width height border-width value-mask)
   (labels ((has-x () (= 1 (logand value-mask 1)))
            (has-y () (= 2 (logand value-mask 2)))
            (has-w () (= 4 (logand value-mask 4)))
