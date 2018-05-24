@@ -93,12 +93,6 @@
          (add-window window)
          (xlib:map-window window))))
 
-(define-event-handler :map-notify (window override-redirect-p)
-  (log-format "map-notify: ~@{~S ~}" window override-redirect-p)
-  (unless override-redirect-p
-    (alexandria:when-let (window (find-window window :frame nil))
-      (focus-window window))))
-
 (define-event-handler :unmap-notify (window event-window)
   (log-format "unmap-notify: ~@{~S ~}" window event-window)
   (unless (xlib:window-equal (root *window-manager*) event-window)
