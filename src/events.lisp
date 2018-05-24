@@ -70,6 +70,9 @@
                                        :y (and (has-y) y)
                                        :width (and (has-w) width)
                                        :height (and (has-h) height))
+               (when (and (has-stack-mode) (eq stack-mode :above))
+                 (focus-window window))
+               #+(or)
                (xlib:send-event xwin :configure-notify nil
                                 :event-window xwin
                                 :window xwin
