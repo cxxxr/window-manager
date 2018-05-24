@@ -216,7 +216,7 @@
                           :width (+ (window-width window) mx)
                           :height (+ (window-height window) my)))
 
-(defun change-window-geometry (window &key x y width height (border +border-width+))
+(defun change-window-geometry (window &key x y width height)
   (let ((xwin (window-xwin window))
         (frame (window-frame window)))
     (xlib:with-state (frame)
@@ -228,10 +228,10 @@
           (setf (window-y window) y)
           (setf (xlib:drawable-y frame) y))
         (when width
-          (setf (xlib:drawable-width frame) (+ (xlib:drawable-x xwin) width border))
+          (setf (xlib:drawable-width frame) (+ (xlib:drawable-x xwin) width +border-width+))
           (setf (window-width window) width)
           (setf (xlib:drawable-width xwin) width))
         (when height
-          (setf (xlib:drawable-height frame) (+ (xlib:drawable-y xwin) height border))
+          (setf (xlib:drawable-height frame) (+ (xlib:drawable-y xwin) height +border-width+))
           (setf (window-height window) height)
           (setf (xlib:drawable-height xwin) height))))))
