@@ -23,6 +23,8 @@
 
 (defun add-window (xwin)
   (log-format "add-window: ~A type=~A" xwin (get-net-window-type xwin))
+  (when (eq (xlib:window-override-redirect xwin) :on)
+    (return-from add-window))
   (when (dock-p xwin)
     (return-from add-window))
   (xlib:with-server-grabbed ((display *window-manager*))
@@ -35,8 +37,7 @@
                                       :border +frame-color+
                                       :background +frame-color+
                                       :event-mask '(:substructure-notify
-                                                    :substructure-redirect
-                                                    :property-change)
+                                                    :substructure-redirect)
                                       :override-redirect :on))
            (window (make-instance 'window
                                   :xwin xwin
