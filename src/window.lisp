@@ -59,7 +59,8 @@
       (cond ((eq (xlib:window-map-state xwin) :viewable)
              (incf (window-count-ignore-unmap window)))
             (t
-             (xlib:map-window frame))))))
+             (xlib:map-window frame)))
+      window)))
 
 (defun remove-window (window)
   (log-format "remove-window: ~A" window)

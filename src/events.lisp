@@ -89,12 +89,17 @@
              (when (has-h) (setf (xlib:drawable-height xwin) height))
              (when (has-border) (setf (xlib:drawable-border-width xwin) border-width)))))))
 
-(define-event-handler :map-request (window)
-  (log-format "map-request: ~A" window)
-  (cond ((find-window window :frame nil))
-        (t
-         (add-window window)
-         (xlib:map-window window))))
+(define-event-handler :map-request (((:window xwin)) send-event-p)
+  (log-format "map-request: ~@{~S ~}" xwin send-event-p)
+  (unless send-event-p
+    (cond ((find-window xwin :frame nil))
+          (t
+           (let ((window (add-window xwin)))
+             (xlib:map-window xwin)
+             (let ((wm-hints (xlib:wm-hints xwin)))
+               (when (or (null wm-hints)
+                         (eq :on (xlib:wm-hints-input wm-hints)))
+                 (focus-window window))))))))
 
 (define-event-handler :unmap-notify (window event-window)
   (log-format "unmap-notify: ~@{~S ~}" window event-window)
