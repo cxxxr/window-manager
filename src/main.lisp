@@ -4,6 +4,7 @@
   (start-window-manager
    (make-window-manager display)
    :initialized-hook (lambda ()
+                       #+lispworks (setf *wm-thread* mp:*current-process*)
                        (add-vdesk)
                        (add-vdesk)
                        (add-vdesk)

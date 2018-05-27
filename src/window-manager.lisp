@@ -1,6 +1,7 @@
 (in-package :window-manager)
 
 (defvar *window-manager*)
+(defvar *wm-thread*)
 
 (defparameter *netwm-root-window-properties*
   '(:_NET_CLIENT_LIST
@@ -162,6 +163,12 @@
    (fullscreen :initform nil :accessor window-fullscreen)
    (hidden-p :initform nil :accessor window-hidden-p)))
 
+(defun change-property (window property data type format
+                               &rest args &key (mode :replace) (start 0) end transform)
+  (declare (ignore mode start end transform))
+  (let ((args (list* window property data type format args)))
+    (apply #'xlib:change-property args)))
+
 (defmethod (setf current-window) :after (window (*window-manager* window-manager))
   (set-net-active-window (if window (window-xwin window) :none)))
 
@@ -188,7 +195,7 @@
   (first (xlib:get-property xwin :WM_STATE)))
 
 (defun (setf wm-state) (state xwin)
-  (xlib:change-property xwin :WM_STATE (list state) :WM_STATE 32))
+  (change-property xwin :WM_STATE (list state) :WM_STATE 32))
 
 (defun send-client-message (xwin type &rest data)
   (xlib:send-event xwin
@@ -211,35 +218,35 @@
   (eq (get-net-window-type xwin) :_NET_WM_WINDOW_TYPE_DOCK))
 
 (defun init-net-wm-allowed-actions (xwin)
-  (xlib:change-property xwin :_NET_WM_ALLOWED_ACTIONS
-                        (mapcar (lambda (a)
-                                  (xlib:intern-atom (display *window-manager*) a))
-                                *netwm-allowed-actions*)
-                        :atom 32))
+  (change-property xwin :_NET_WM_ALLOWED_ACTIONS
+                   (mapcar (lambda (a)
+                             (xlib:intern-atom (display *window-manager*) a))
+                           *netwm-allowed-actions*)
+                   :atom 32))
 
 (defun set-net-current-desktop (index)
-  (xlib:change-property (root *window-manager*)
-                        :_NET_CURRENT_DESKTOP
-                        (list index)
-                        :cardinal 32))
+  (change-property (root *window-manager*)
+                   :_NET_CURRENT_DESKTOP
+                   (list index)
+                   :cardinal 32))
 
 (defun set-net-active-window (xwin)
-  (xlib:change-property (root *window-manager*)
-                        :_NET_ACTIVE_WINDOW
-                        (list (if (eq xwin :none) xwin (xlib:drawable-id xwin)))
-                        :window 32))
+  (change-property (root *window-manager*)
+                   :_NET_ACTIVE_WINDOW
+                   (list (if (eq xwin :none) xwin (xlib:drawable-id xwin)))
+                   :window 32))
 
 (defun set-net-wm-desktop (window vdesk)
-  (xlib:change-property (window-xwin window)
-                        :_NET_WM_DESKTOP
-                        (list (vdesk-index vdesk))
-                        :cardinal 32))
+  (change-property (window-xwin window)
+                   :_NET_WM_DESKTOP
+                   (list (vdesk-index vdesk))
+                   :cardinal 32))
 
 (defun set-net-frame-extents (xwin extents)
-  (xlib:change-property xwin
-                        :_NET_FRAME_EXTENTS
-                        extents
-                        :cardinal 32))
+  (change-property xwin
+                   :_NET_FRAME_EXTENTS
+                   extents
+                   :cardinal 32))
 
 (defun get-net-wm-state (xwin)
   (loop :for id :in (xlib:get-property xwin :_NET_WM_STATE)
@@ -247,36 +254,36 @@
 
 (defun add-net-wm-state (xwin states)
   (let ((states (uiop:ensure-list states)))
-    (xlib:change-property xwin :_NET_WM_STATE
-                          (loop :for state :in states
-                                :collect (xlib:find-atom (display *window-manager*) state))
-                          :atom 32
-                          :mode :append)))
+    (change-property xwin :_NET_WM_STATE
+                     (loop :for state :in states
+                           :collect (xlib:find-atom (display *window-manager*) state))
+                     :atom 32
+                     :mode :append)))
 
 (defun remove-net-wm-state (xwin states)
   (let ((states (uiop:ensure-list states)))
     (dolist (state states)
-      (xlib:change-property xwin :_NET_WM_STATE
-                            (delete (xlib:find-atom (display *window-manager*) state)
-                                    (xlib:get-property xwin :_NET_WM_STATE))
-                            :atom 32
-                            :mode :replace))))
+      (change-property xwin :_NET_WM_STATE
+                       (delete (xlib:find-atom (display *window-manager*) state)
+                               (xlib:get-property xwin :_NET_WM_STATE))
+                       :atom 32
+                       :mode :replace))))
 
 (defun update-net-client-list ()
-  (xlib:change-property (root *window-manager*)
-                        :_NET_CLIENT_LIST
-                        (all-windows *window-manager*)
-                        :window 32
-                        :transform (lambda (window)
-                                     (xlib:drawable-id (window-xwin window)))))
+  (change-property (root *window-manager*)
+                   :_NET_CLIENT_LIST
+                   (all-windows *window-manager*)
+                   :window 32
+                   :transform (lambda (window)
+                                (xlib:drawable-id (window-xwin window)))))
 
 (defun update-net-client-list-stacking ()
-  (xlib:change-property (root *window-manager*)
-                        :_NET_CLIENT_LIST_STACKING
-                        (all-ordered-windows)
-                        :window 32
-                        :transform (lambda (window)
-                                     (xlib:drawable-id (window-xwin window)))))
+  (change-property (root *window-manager*)
+                   :_NET_CLIENT_LIST_STACKING
+                   (all-ordered-windows)
+                   :window 32
+                   :transform (lambda (window)
+                                (xlib:drawable-id (window-xwin window)))))
 
 (defun update-net-wm-desktop ()
   (loop :for vdesk :in (vdesks *window-manager*)
@@ -284,60 +291,60 @@
               (set-net-wm-desktop window vdesk))))
 
 (defun update-net-number-of-desktops ()
-  (xlib:change-property (root *window-manager*)
-                        :_NET_NUMBER_OF_DESKTOPS
-                        (list (length (vdesks *window-manager*)))
-                        :cardinal 32))
+  (change-property (root *window-manager*)
+                   :_NET_NUMBER_OF_DESKTOPS
+                   (list (length (vdesks *window-manager*)))
+                   :cardinal 32))
 
 (defun initialize-window-manager (*window-manager*)
   (init-modifiers)
   (grab-all)
   (setf (xlib:window-event-mask (root *window-manager*))
         '(:substructure-notify :substructure-redirect))
-  (xlib:change-property (root *window-manager*)
-                        :_NET_SUPPORTED
-                        (mapcar (lambda (s)
-                                  (xlib:intern-atom (display *window-manager*) s))
-                                (remove-duplicates (append *netwm-root-window-properties*
-                                                           *netwm-other-root-window-messages*
-                                                           *netwm-application-window-properties*
-                                                           *netwm-window-types*
-                                                           *netwm-supported*)))
-                        :atom 32)
+  (change-property (root *window-manager*)
+                   :_NET_SUPPORTED
+                   (mapcar (lambda (s)
+                             (xlib:intern-atom (display *window-manager*) s))
+                           (remove-duplicates (append *netwm-root-window-properties*
+                                                      *netwm-other-root-window-messages*
+                                                      *netwm-application-window-properties*
+                                                      *netwm-window-types*
+                                                      *netwm-supported*)))
+                   :atom 32)
   (update-net-client-list)
   (update-net-number-of-desktops)
-  (xlib:change-property (root *window-manager*)
-                        :_NET_DESKTOP_GEOMETRY
-                        (list (xlib:screen-width (screen *window-manager*))
-                              (xlib:screen-height (screen *window-manager*)))
-                        :cardinal 32)
-  (xlib:change-property (root *window-manager*)
-                        :_NET_DESKTOP_VIEWPORT
-                        (list 0 0)
-                        :cardinal 32)
+  (change-property (root *window-manager*)
+                   :_NET_DESKTOP_GEOMETRY
+                   (list (xlib:screen-width (screen *window-manager*))
+                         (xlib:screen-height (screen *window-manager*)))
+                   :cardinal 32)
+  (change-property (root *window-manager*)
+                   :_NET_DESKTOP_VIEWPORT
+                   (list 0 0)
+                   :cardinal 32)
   (set-net-current-desktop 0)
-  (xlib:change-property (root *window-manager*)
-                        :_NET_WORKAREA
-                        (list 0
-                              0
-                              (xlib:drawable-width (root *window-manager*))
-                              (xlib:drawable-height (root *window-manager*)))
-                        :cardinal 32)
+  (change-property (root *window-manager*)
+                   :_NET_WORKAREA
+                   (list 0
+                         0
+                         (xlib:drawable-width (root *window-manager*))
+                         (xlib:drawable-height (root *window-manager*)))
+                   :cardinal 32)
   (let ((w (xlib:create-window :parent (root *window-manager*) :x 0 :y 0 :width 1 :height 1)))
     (setf (supporting *window-manager*) w)
-    (xlib:change-property (root *window-manager*)
-                          :_NET_SUPPORTING_WM_CHECK
-                          (list w)
-                          :window 32
-                          :transform #'xlib:drawable-id)
-    (xlib:change-property w :_NET_SUPPORTING_WM_CHECK
-                          (list w)
-                          :window 32
-                          :transform #'xlib:drawable-id)
-    (xlib:change-property w :_NET_WM_NAME
-                          (string-downcase (package-name *package*))
-                          :string 8
-                          :transform #'xlib:char->card8))
+    (change-property (root *window-manager*)
+                     :_NET_SUPPORTING_WM_CHECK
+                     (list w)
+                     :window 32
+                     :transform #'xlib:drawable-id)
+    (change-property w :_NET_SUPPORTING_WM_CHECK
+                     (list w)
+                     :window 32
+                     :transform #'xlib:drawable-id)
+    (change-property w :_NET_WM_NAME
+                     (string-downcase (package-name *package*))
+                     :string 8
+                     :transform #'xlib:char->card8))
   (dolist (xwin (xlib:query-tree (root *window-manager*)))
     (when (and (eq (xlib:window-override-redirect xwin) :off)
                (eq (xlib:window-map-state xwin) :viewable))

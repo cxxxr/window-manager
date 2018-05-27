@@ -13,4 +13,6 @@
                (:file "src/window")
                (:file "src/events")
                (:file "src/command")
-               (:file "src/main")))
+               (:file "src/main")
+               #+lispworks
+               (:file "src/api")))
