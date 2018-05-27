@@ -36,4 +36,13 @@
                        (bind-key (make-key-input "3" :super t :control t)
                                  (get-command "move window to desktop 3"))
                        (bind-key (make-key-input "4" :super t :control t)
-                                 (get-command "move window to desktop 4")))))
+                                 (get-command "move window to desktop 4"))
+
+                       #+lispworks
+                       (bind-key (make-key-input "F12" :super t)
+                                 (lambda ()
+                                   (capi:display (make-instance 'lw-tools:listener))))
+                       #+lispworks
+                       (bind-key (make-key-input "F11" :super t)
+                                 (lambda ()
+                                   (capi:display (make-instance 'lw-tools:editor)))))))
