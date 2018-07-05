@@ -21,6 +21,16 @@
         +frame-height+
         +border-width+))
 
+(defun border-from-mwm-hints (xwin)
+  (let ((result (xlib:get-property xwin :_MOTIF_WM_HINTS)))
+    (or (null result)
+        (destructuring-bind (flags functions decorations input-mode status)
+            result
+          (declare (ignore functions input-mode status))
+          (not (and (logand flags 2)
+                    (zerop (logand decorations 1))
+                    (zerop (logand decorations 2))))))))
+
 (defun add-window (xwin)
   (log-format "add-window: ~A type=~A" xwin (get-net-window-type xwin))
   (when (eq (xlib:window-override-redirect xwin) :on)
@@ -33,7 +43,8 @@
                                       :y (xlib:drawable-y xwin)
                                       :width (xlib:drawable-width xwin)
                                       :height (+ (xlib:drawable-height xwin) +frame-height+)
-                                      :border-width +border-width+
+                                      :border-width (let ((use-border (border-from-mwm-hints xwin)))
+                                                      (if use-border +border-width+ 0))
                                       :border +frame-color+
                                       :background +frame-color+
                                       :event-mask '(:substructure-notify
