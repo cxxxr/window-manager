@@ -161,7 +161,8 @@
    (old-height :initform nil :accessor window-old-height)
    (count-ignore-unmap :initform 0 :accessor window-count-ignore-unmap)
    (fullscreen :initform nil :accessor window-fullscreen)
-   (hidden-p :initform nil :accessor window-hidden-p)))
+   (hidden-p :initform nil :accessor window-hidden-p)
+   (frame-extents :initarg :frame-extents :accessor window-frame-extents)))
 
 (defun change-property (window property data type format
                                &rest args &key (mode :replace) (start 0) end transform)

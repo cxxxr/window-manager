@@ -14,14 +14,15 @@
     (loop :for vdesk :in (cons current-vdesk (remove current-vdesk (vdesks *window-manager*)))
           :append (vdesk-windows vdesk))))
 
-(defun get-frame-extents (window)
-  (declare (ignore window))
-  (list +border-width+
-        +border-width+
-        +frame-height+
-        +border-width+))
+(defstruct (frame-extents (:type list) (:constructor %make-frame-extents (left right top bottom)))
+  left right top bottom)
 
-(defun border-from-mwm-hints (xwin)
+(defun make-frame-extents (use-decoration)
+  (if use-decoration
+      (%make-frame-extents +border-width+ +border-width+ +frame-height+ +border-width+)
+      (%make-frame-extents 0 0 0 0)))
+
+(defun decoration-from-mwm-hints (xwin)
   (let ((result (xlib:get-property xwin :_MOTIF_WM_HINTS)))
     (or (null result)
         (destructuring-bind (flags functions decorations input-mode status)
@@ -38,13 +39,16 @@
   (when (dock-p xwin)
     (return-from add-window))
   (xlib:with-server-grabbed ((display *window-manager*))
-    (let* ((frame (xlib:create-window :parent (root *window-manager*)
+    (let* ((use-decoration (decoration-from-mwm-hints xwin))
+           (frame-extents (make-frame-extents use-decoration))
+           (frame (xlib:create-window :parent (root *window-manager*)
                                       :x (xlib:drawable-x xwin)
                                       :y (xlib:drawable-y xwin)
                                       :width (xlib:drawable-width xwin)
-                                      :height (+ (xlib:drawable-height xwin) +frame-height+)
-                                      :border-width (let ((use-border (border-from-mwm-hints xwin)))
-                                                      (if use-border +border-width+ 0))
+                                      :height (+ (xlib:drawable-height xwin)
+                                                 (+ (frame-extents-top frame-extents)
+                                                    (frame-extents-bottom frame-extents)))
+                                      :border-width (frame-extents-left frame-extents)
                                       :border +frame-color+
                                       :background +frame-color+
                                       :event-mask '(:substructure-notify
@@ -56,16 +60,17 @@
                                   :x (xlib:drawable-x xwin)
                                   :y (xlib:drawable-y xwin)
                                   :width (xlib:drawable-width xwin)
-                                  :height (xlib:drawable-height xwin)))
+                                  :height (xlib:drawable-height xwin)
+                                  :frame-extents frame-extents))
            (current-vdesk (current-vdesk *window-manager*)))
       (push window (vdesk-windows current-vdesk))
       (alexandria:nconcf (all-windows *window-manager*) (list window))
       (set-net-wm-desktop window current-vdesk)
-      (set-net-frame-extents (window-xwin window) (get-frame-extents window))
+      (set-net-frame-extents (window-xwin window) frame-extents)
       (update-net-client-list)
       (update-net-client-list-stacking)
       (xlib:add-to-save-set xwin)
-      (xlib:reparent-window xwin frame 0 +frame-height+)
+      (xlib:reparent-window xwin frame 0 (frame-extents-top frame-extents))
       (init-net-wm-allowed-actions xwin)
       (cond ((eq (xlib:window-map-state xwin) :viewable)
              (incf (window-count-ignore-unmap window)))
@@ -135,21 +140,27 @@
   (maximize-window window t))
 
 (defun maximize-window (window &optional fullscreen)
-  (let (x y width height)
+  (let ((frame-extents (window-frame-extents window))
+        x y width height)
     (setf (window-old-x window) (window-x window)
           (window-old-y window) (window-y window)
           (window-old-width window) (window-width window)
           (window-old-height window) (window-height window)
-          x (if fullscreen (- +border-width+) 0)
-          y (if fullscreen (- (+ +border-width+ +frame-height+)) 0)
+          x (if fullscreen (- (frame-extents-left frame-extents)) 0)
+          y (if fullscreen
+                (- (+ (frame-extents-top frame-extents)
+                      (frame-extents-bottom frame-extents)))
+                0)
           width (if fullscreen
                     (xlib:drawable-width (root *window-manager*))
                     (- (xlib:drawable-width (root *window-manager*))
-                       (* 2 +border-width+)))
+                       (+ (frame-extents-left frame-extents)
+                          (frame-extents-right frame-extents))))
           height (if fullscreen
                      (xlib:drawable-height (root *window-manager*))
                      (- (xlib:drawable-height (root *window-manager*))
-                        (+ +frame-height+ +border-width+))))
+                        (+ (frame-extents-top frame-extents)
+                           (frame-extents-bottom frame-extents)))))
     (add-net-wm-state (window-xwin window)
                       (list* :_NET_WM_STATE_MAXIMIZED_VERT
                              :_NET_WM_STATE_MAXIMIZED_HORZ
@@ -180,7 +191,9 @@
 
 (defun on-frame-p (window x y)
   (declare (ignore x))
-  (<= 0 (- y (window-y window)) +frame-height+))
+  (<= 0
+      (- y (window-y window))
+      (frame-extents-top (window-frame-extents window))))
 
 (defun update-window-order ()
   (let ((pos (position (current-window *window-manager*) (vdesk-windows (current-vdesk *window-manager*)))))
@@ -231,7 +244,8 @@
 
 (defun change-window-geometry (window &key x y width height)
   (let ((xwin (window-xwin window))
-        (frame (window-frame window)))
+        (frame (window-frame window))
+        (frame-extents (window-frame-extents window)))
     (xlib:with-state (frame)
       (xlib:with-state (xwin)
         (when x
@@ -241,10 +255,12 @@
           (setf (window-y window) y)
           (setf (xlib:drawable-y frame) y))
         (when width
-          (setf (xlib:drawable-width frame) (+ (xlib:drawable-x xwin) width +border-width+))
+          (setf (xlib:drawable-width frame)
+                (+ (xlib:drawable-x xwin) width (frame-extents-right frame-extents)))
           (setf (window-width window) width)
           (setf (xlib:drawable-width xwin) width))
         (when height
-          (setf (xlib:drawable-height frame) (+ (xlib:drawable-y xwin) height +border-width+))
+          (setf (xlib:drawable-height frame)
+                (+ (xlib:drawable-y xwin) height (frame-extents-bottom frame-extents)))
           (setf (window-height window) height)
           (setf (xlib:drawable-height xwin) height))))))
