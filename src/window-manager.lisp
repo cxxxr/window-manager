@@ -270,6 +270,9 @@
                        :atom 32
                        :mode :replace))))
 
+(defun remove-net-wm-desktop (xwin)
+  (xlib:delete-property xwin :_NET_WM_DESKTOP))
+
 (defun update-net-client-list ()
   (change-property (root *window-manager*)
                    :_NET_CLIENT_LIST
