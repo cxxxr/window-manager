@@ -1,9 +1,22 @@
 (in-package :window-manager)
 
+(defun error-handler (display error-key &rest key-vals &key asynchronous &allow-other-keys)
+  (cond
+    ((and asynchronous
+          (find error-key '(xlib:window-error xlib:drawable-error xlib:match-error)))
+     (log-format "Ignoring error: ~s~%" error-key))
+    ((eq error-key 'xlib:access-error)
+     (write-line "Another window manager is running."))
+    (asynchronous
+     (format t "Caught Asynchronous X Error: ~s ~s" error-key key-vals))
+    (t
+     (apply 'error error-key :display display :error-key error-key key-vals))))
+
 (defun main (&key display)
   (start-window-manager
    (make-window-manager display)
    :initialized-hook (lambda ()
+                       (setf (xlib:display-error-handler (display *window-manager*)) 'error-handler)
                        #+lispworks (setf *wm-thread* mp:*current-process*)
                        (add-vdesk)
                        (add-vdesk)
